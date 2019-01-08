@@ -18,6 +18,7 @@ parse.ITALIC_SYM = "_"
 parse.STRIKETHROUGH_SYM = "~~"
 parse.VARIABLE_SYM = "$"
 parse.CODE_SYM = "`"
+parse.MATH_SYM = "$$"
 parse.REFERENCE_SYM = "@"
 
 parse.LINE_COMMENT = "//"
@@ -244,6 +245,7 @@ function parseTextInline(text)
 			patternEscape(parse.REFERENCE_SYM) .. "%b()",
 			patternEscape(parse.VARIABLE_SYM) .. "[%w%-]+",
 			patternEscape(parse.VARIABLE_SYM) .. "%b()",
+			patternEscape(parse.MATH_SYM) .. ".-" .. patternEscape(parse.MATH_SYM),
 			{"`+", function(s) return s end}
 		} or {})
 
@@ -389,6 +391,16 @@ function applyItemInline(inline)
 				if pos then
 					insert(items, { type = markup.CODE, content = text:sub(i + len, pos - 1) })
 					i = pos + len
+				else
+					append(text:sub(i, i))
+				end
+
+			elseif text:sub(i, i + #parse.MATH_SYM - 1) == parse.MATH_SYM then
+				local pos = text:find(patternEscape(parse.MATH_SYM), i + #parse.MATH_SYM)
+
+				if pos then
+					insert(items, { type = markup.MATH, content = text:sub(i + #parse.MATH_SYM, pos - 1) })
+					i = pos + #parse.MATH_SYM
 				else
 					append(text:sub(i, i))
 				end
@@ -569,7 +581,7 @@ function quote(s)
 end
 
 function patternEscape(pat)
-	return pat:gsub("[%-%+%*%?%.%(%)%[%]]", "%%%1")
+	return pat:gsub("[%-%+%*%?%.%(%)%[%]%$%^]", "%%%1")
 end
 
 return parse

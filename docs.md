@@ -39,6 +39,7 @@
 		* [Text](#text-inline)
 		* [Variable](#variable-inline)
 		* [Code](#code-inline)
+		* [Math](#math-inline)
 		* [Underline](#underline-inline)
 		* [Bold](#bold-inline)
 		* [Italic](#italic-inline)
@@ -65,6 +66,7 @@
 	* [`STRIKETHROUGH_SYM`](#strikethrough_sym)
 	* [`VARIABLE_SYM`](#variable_sym)
 	* [`CODE_SYM`](#code_sym)
+	* [`MATH_SYM`](#math_sym)
 	* [`REFERENCE_SYM`](#reference_sym)
 
 ## The language
@@ -303,6 +305,13 @@ type = markup.CODE
 content : string
 ```
 
+#### Math (inline)
+
+```
+type = markup.MATH
+content : string
+```
+
 #### Underline (inline)
 
 ```
@@ -501,6 +510,14 @@ Defines the code open/close symbol. Note that `n` repetitions of this can be use
 
 ```
 parse.CODE_SYM = "`"
+```
+
+### `MATH_SYM`
+
+Defines the math open/close symbol.
+
+```
+parse.MATH_SYM = "$$"
 ```
 
 ### `REFERENCE_SYM`

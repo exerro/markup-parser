@@ -65,6 +65,11 @@
 		}
 
 		{
+			type = markup.MATH,
+			content = S                       ; S is the string content of the maths (latex format)
+		}
+
+		{
 			type = markup.UNDERLINE,
 			content = inline-text
 		}
@@ -116,6 +121,7 @@ local markup = {}
 markup.TEXT = "text"
 markup.VARIABLE = "variable"
 markup.CODE = "code"
+markup.MATH = "math"
 markup.UNDERLINE = "underline"
 markup.BOLD = "bold"
 markup.ITALIC = "italic"

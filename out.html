@@ -118,6 +118,9 @@
 				<a class="md-link" href="#code-inline"><span class="md-text">Code</span></a>
 			</li>
 			<li class="md-list-item">
+				<a class="md-link" href="#math-inline"><span class="md-text">Math</span></a>
+			</li>
+			<li class="md-list-item">
 				<a class="md-link" href="#underline-inline"><span class="md-text">Underline</span></a>
 			</li>
 			<li class="md-list-item">
@@ -197,6 +200,9 @@
 		</li>
 		<li class="md-list-item">
 			<a class="md-link" href="#code_sym"><code class="md-code">CODE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#math_sym"><code class="md-code">MATH_SYM</code></a>
 		</li>
 		<li class="md-list-item">
 			<a class="md-link" href="#reference_sym"><code class="md-code">REFERENCE_SYM</code></a>
@@ -566,6 +572,15 @@ type = markup.CODE
 content : string
 </pre></div>
 
+<h4 id="math-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Math (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.MATH
+content : string
+</pre></div>
+
 <h4 id="underline-inline" class="md-header md-header4 md-block">
 	<span class="md-text">Underline (inline)</span>
 </h4>
@@ -852,6 +867,18 @@ parse.VARIABLE_SYM = &quot;$&quot;
 
 <div class="md-block-code md-block"><pre>
 parse.CODE_SYM = &quot;`&quot;
+</pre></div>
+
+<h3 id="math_sym" class="md-header md-header3 md-block">
+	<code class="md-code">MATH_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the math open&frasl;close symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.MATH_SYM = &quot;$$&quot;
 </pre></div>
 
 <h3 id="reference_sym" class="md-header md-header3 md-block">

@@ -28,6 +28,7 @@ html.HORIZONTAL_RULE = "~hr"
 html.TEXT = "~text"
 html.VARIABLE = "~variable"
 html.CODE = "~code"
+html.MATH = "~math"
 html.UNDERLINE = "~underline"
 html.BOLD = "~bold"
 html.ITALIC = "~italic"
@@ -36,10 +37,12 @@ html.IMAGE = "~image"
 html.LINK = "~link"
 html.REFERENCE = "~reference"
 
+html.latex_render_script = latex_render_script
+
 local getClass
 local blocksToHTML, blockToHTML, inlinesToHTML, inlineToHTML
 local listElements, listItemToHTML
-local map, indent
+local map, indent, urlEscape, urlEscapeTable
 
 function html.render(blocks, styles)
 	if type(blocks) == "string" then
@@ -97,9 +100,15 @@ end
 function blockToHTML(block)
 
 	if block.type == markup.PARAGRAPH then
-		return "<p class=\"" .. getClass(html.PARAGRAPH, html.BLOCK) .. "\">\n"
-		.. indent(inlinesToHTML(block.content):gsub("\n", "<br>"))
-		.. "\n</p>"
+		if #block.content == 1 and block.content[1].type == markup.MATH then
+			return "<img class=\"" .. getClass(html.MATH, html.BLOCK) .. "\" "
+			.. "alt=\"" .. html.escape(block.content[1].content) .. "\" "
+			.. "src=\"https://chart.googleapis.com/chart?cht=tx&chl=%5CLarge%20" .. urlEscape(block.content[1].content) .. "\">"
+		else
+			return "<p class=\"" .. getClass(html.PARAGRAPH, html.BLOCK) .. "\">\n"
+			.. indent(inlinesToHTML(block.content):gsub("\n", "<br>"))
+			.. "\n</p>"
+		end
 
 	elseif block.type == markup.HEADER then
 		local content = inlinesToHTML(block.content)
@@ -168,6 +177,11 @@ function inlineToHTML(inline)
 	elseif inline.type == markup.CODE then
 		return "<code class=\"" .. getClass(html.CODE) .. "\">" .. html.escape(inline.content) .. "</code>"
 
+	elseif inline.type == markup.MATH then
+		return "<img class=\"" .. getClass(html.MATH) .. "\" "
+		.. "alt=\"" .. html.escape(inline.content) .. "\" "
+		.. "src=\"https://chart.googleapis.com/chart?cht=tx&chl=" .. urlEscape(inline.content) .. "\">"
+
 	elseif inline.type == markup.UNDERLINE then
 		return "<u class=\"" .. getClass(html.UNDERLINE) .. "\">"
 		.. inlinesToHTML(inline.content)
@@ -207,6 +221,9 @@ function inlineToHTML(inline)
 		else
 			return "<span class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no reference formatter for '" .. inline.reference .. "' :( &gt;</span>"
 		end
+
+	else
+		return error("internal markup error: unknown inline type (" .. tostring(inline.type) .. ")")
 
 	end
 end
@@ -265,6 +282,16 @@ end
 
 function indent(text, amount)
 	return ("\t"):rep(amount or 1) .. text:gsub("\n", "\n" .. ("\t"):rep(amount or 1))
+end
+
+function urlEscape(text)
+	return text:gsub("[^a-zA-Z0-9_\\]", urlEscapeTable)
+end
+
+urlEscapeTable = {}
+
+for i = 0, 255 do
+	urlEscapeTable[string.char(i)] = "%" .. ("%02X"):format(i)
 end
 
 return html

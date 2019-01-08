@@ -11,6 +11,10 @@
 	line-height: 1.5;
 }
 
+.md-content * {
+	vertical-align: middle;
+}
+
 .md-content > :first-child {
 	margin-top: 0 !important;
 }
@@ -136,6 +140,18 @@
 	margin: 0;
 	padding: 0.2em 0.4em;
 	display: inline-block;
+}
+
+.md-math {
+	font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+	font-style: italic;
+	margin: 0;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.md-math .md-block {
+	
 }
 
 .md-underline {
