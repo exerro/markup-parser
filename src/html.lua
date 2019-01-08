@@ -77,12 +77,14 @@ function html.blockToHTML(block)
 
 	if block.type == parse.PARAGRAPH then
 		return "<p class=\"" .. getClass(html.PARAGRAPH) .. "\">\n"
-		.. indent(html.inlinesToHTML(block.content))
+		.. indent(html.inlinesToHTML(block.content):gsub("\n", "<br>"))
 		.. "\n</p>"
 
 	elseif block.type == parse.HEADER then
-		return "<h" .. block.size .. " class=\"" .. getClass(html.HEADER) .. " " .. getClass(html.HEADER) .. block.size .. "\">\n"
-		.. indent(html.inlinesToHTML(block.content))
+		local content = html.inlinesToHTML(block.content)
+
+		return "<h" .. block.size .. " id=\"" .. content:gsub("<.->", ""):gsub("^%s+", ""):gsub("%s+$", ""):gsub("(%s)%s+", "%1"):gsub("%W", "-") .. "\" class=\"" .. getClass(html.HEADER) .. " " .. getClass(html.HEADER) .. block.size .. "\">\n"
+		.. indent(content)
 		.. "\n</h" .. block.size .. ">"
 
 	elseif block.type == parse.LIST then
@@ -92,27 +94,26 @@ function html.blockToHTML(block)
 
 	elseif block.type == parse.BLOCK_CODE then
 		local lang = block.language:lower()
-		local content = block.content
 
 		if highlighters[lang] then
-			content = tostring(highlighters[lang])
+			return tostring(highlighters[lang](block.content))
 		end
 
 		-- TODO: maybe have some kind of box around the code? an indication of language? idk
-		return "<p class=\"" .. getClass(html.BLOCK_CODE) .. "\"><pre>\n"
-		.. content
-		.. "\n</pre></p>"
+		return html.codeEnclose("<pre>\n"
+		.. block.content
+		.. "\n</pre>", lang)
 
 	elseif block.type == parse.BLOCK_QUOTE then
 		return "<div class=\"" .. getClass(html.BLOCK_QUOTE) .. "\">\n"
-		.. html.blocksToHTML(block.content)
+		.. indent(html.blocksToHTML(block.content))
 		.. "\n</div>"
 
 	elseif block.type == parse.RESOURCE then
 		if resourceLoader then
 			return tostring(resourceLoader(block.resource))
 		else
-			return "<p class=\"" .. getClass(html.FORMAT_ERROR) .. "\"> No resource loader for '" .. block.resource .. "' :( </p>"
+			return "<p class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no resource loader for '" .. block.resource .. "' :( &gt;</p>"
 		end
 
 	elseif block.type == parse.HORIZONTAL_RULE then
@@ -137,55 +138,59 @@ end
 
 function html.inlineToHTML(inline)
 	if inline.type == parse.TEXT then
-		return "<span class=\"" .. getClass(html.TEXT) .. "\"> " .. inline.content .. " </span>"
+		return "<span class=\"" .. getClass(html.TEXT) .. "\">" .. inline.content .. "</span>"
 
 	elseif inline.type == parse.VARIABLE then
-		return "<span class=\"" .. getClass(html.VARIABLE) .. "\"> " .. inline.variable .. " </span>"
+		return "<span class=\"" .. getClass(html.VARIABLE) .. "\">" .. inline.variable .. "</span>"
 
 	elseif inline.type == parse.CODE then
-		return "<pre class=\"" .. getClass(html.CODE) .. "\"> " .. inline.content .. " </pre>"
+		return "<span class=\"" .. getClass(html.CODE) .. "\">" .. inline.content .. "</span>"
 
 	elseif inline.type == parse.UNDERLINE then
-		return "<u class=\"" .. getClass(html.STRIKETHROUGH) .. "\"> "
+		return "<u class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
-		.. " </u>"
+		.. "</u>"
 
 	elseif inline.type == parse.BOLD then
-		return "<strong class=\"" .. getClass(html.STRIKETHROUGH) .. "\"> "
+		return "<strong class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
-		.. " </strong>"
+		.. "</strong>"
 
 	elseif inline.type == parse.ITALIC then
-		return "<i class=\"" .. getClass(html.STRIKETHROUGH) .. "\"> "
+		return "<i class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
-		.. " </i>"
+		.. "</i>"
 
 	elseif inline.type == parse.STRIKETHROUGH then
-		return "<del class=\"" .. getClass(html.STRIKETHROUGH) .. "\"> "
+		return "<del class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
-		.. " </del>"
+		.. "</del>"
 
 	elseif inline.type == parse.IMAGE then
 		return "<img class=\"" .. getClass(html.IMAGE) .. "\" alt=\"" .. inline.alt_text .. "\" src=\"" .. inline.source .. "\">"
 
 	elseif inline.type == parse.LINK then
-		return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. inline.url .. "\"> " .. html.inlinesToHTML(inline.content) .. " </a>"
+		return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. inline.url .. "\">" .. html.inlinesToHTML(inline.content) .. "</a>"
 
 	elseif inline.type == parse.RELATIVE_LINK then
 		if relativeLinkFormatter then
-			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. relativeLinkFormatter(inline.url) .. "\"> " .. inline.content .. " </a>"
+			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. relativeLinkFormatter(inline.url) .. "\">" .. inline.content .. "</a>"
 		else
-			return "<p class=\"" .. getClass(html.FORMAT_ERROR) .. "\"> No relative link formatter for '" .. inline.url .. "' :( </p>"
+			return "<span class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no relative link formatter for '" .. inline.url .. "' :( &gt;</span>"
 		end
 
 	elseif inline.type == parse.REFERENCE then
 		if referenceFormatter then
-			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. referenceFormatter(inline.reference) .. "\"> " .. inline.content .. " </a>"
+			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. referenceFormatter(inline.reference) .. "\">" .. inline.content .. "</a>"
 		else
-			return "<p class=\"" .. getClass(html.FORMAT_ERROR) .. "\"> No reference formatter for '" .. inline.reference .. "' :( </p>"
+			return "<span class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no reference formatter for '" .. inline.reference .. "' :( &gt;</span>"
 		end
 
 	end
+end
+
+function html.codeEnclose(text, language)
+	return "<p class=\"" .. getClass(html.BLOCK_CODE) .. "\">" .. text .. "</p>"
 end
 
 function html.setSyntaxHighligher(language, highlighter)

@@ -496,7 +496,7 @@ function applyItemInline(inline)
 
 			elseif text:sub(i, i) == parse.CODE_SYM then
 				local len = #text:match("^" .. parse.CODE_SYM .. "+", i)
-				local pos = text:find("^" .. parse.CODE_SYM:rep(len), i + len)
+				local pos = text:find(parse.CODE_SYM:rep(len), i + len)
 
 				if pos then
 					insert(items, { type = parse.CODE, content = text:sub(i + len, pos - 1) })

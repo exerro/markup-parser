@@ -10,7 +10,7 @@ local result = parse.parse([=[
 
 This is nothing
 
-> @ref $var [[`hello`]]
+> @ref $var [[`hello`]] `code` ~~strikethrough~~ _italic_ *bold* __underlined__
 > ![alt](src)
 > [link text](hello)
 
@@ -28,10 +28,66 @@ this is
 some code
 ```
 
-###   hello world
+### ~~  hello world~~
+
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+more
+stuff
+
+# last
 
 ]=])
 
 local h = io.open("out.html", "w")
+h:write("<style> @import url('src/style.css'); @import url('global-style.css'); </style>")
 h:write(html.blocksToHTML(result))
 h:close()

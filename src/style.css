@@ -1,0 +1,109 @@
+
+.md-format-error {
+	color: red;
+	font-weight: bold;
+}
+
+.md-para {
+
+}
+
+.md-header {
+
+}
+
+.md-header1 {
+
+}
+
+.md-header2 {
+
+}
+
+.md-header3 {
+
+}
+
+.md-header4 {
+
+}
+
+.md-header5 {
+
+}
+
+.md-header6 {
+
+}
+
+.md-list {
+
+}
+
+.md-list-item {
+
+}
+
+.md-block-code {
+
+}
+
+.md-block-quote {
+	border-left: 6px solid #dadada;
+	padding-top: 0.6em;
+	padding-bottom: 0.6em;
+	padding-left: 24px;
+}
+
+.md-block-quote > *:first-child {
+	margin-top: 0;
+}
+
+.md-block-quote > *:last-child {
+	margin-bottom: 0;
+}
+
+.md-hr {
+
+}
+
+.md-text {
+
+}
+
+.md-variable {
+
+}
+
+.md-code {
+	font-family: monospace;
+}
+
+.md-underline {
+
+}
+
+.md-bold {
+
+}
+
+.md-italic {
+
+}
+
+.md-strikethrough {
+
+}
+
+.md-image {
+
+}
+
+.md-link {
+
+}
+
+.md-reference {
+
+}
+
