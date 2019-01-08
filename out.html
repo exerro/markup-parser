@@ -151,6 +151,15 @@
 			<a class="md-link" href="#class_prefix"><code class="md-code">CLASS_PREFIX</code></a>
 		</li>
 		<li class="md-list-item">
+			<a class="md-link" href="#line_comment"><code class="md-code">LINE_COMMENT</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#multiline_comment_open"><code class="md-code">MULTILINE_COMMENT_OPEN</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#multiline_comment_close"><code class="md-code">MULTILINE_COMMENT_CLOSE</code></a>
+		</li>
+		<li class="md-list-item">
 			<a class="md-link" href="#header_sym"><code class="md-code">HEADER_SYM</code></a>
 		</li>
 		<li class="md-list-item">
@@ -253,7 +262,7 @@ comment -&frasl;
 </h2>
 
 <p class="md-para md-block">
-<span class="md-text">To load the library, use:</span>
+<span class="md-text">To load the library, use...</span>
 </p>
 
 <div class="md-block-code md-block"><pre>
@@ -261,7 +270,7 @@ local markup = require(&quot;src.markup&quot;)
 </pre></div>
 
 <p class="md-para md-block">
-<span class="md-text">To load parsing capabilities, use</span>
+<span class="md-text">To load parsing capabilities, use...</span>
 </p>
 
 <div class="md-block-code md-block"><pre>
@@ -288,12 +297,21 @@ AST markup.parse(string markup_text)
 	<span class="md-text">HTML output</span>
 </h2>
 
+<p class="md-para md-block">
+<span class="md-text">To load the HTML renderer, use...</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+local html = require(&quot;src.html&quot;)
+</pre></div>
+
 <h4 id="html-render" class="md-header md-header4 md-block">
 	<span class="md-text">html.render()</span>
 </h4>
 
 <div class="md-block-code md-block"><pre>
 string html.render(AST document, string[]? styles)
+string html.render(string document, string[]? styles)
 </pre></div>
 
 <p class="md-para md-block">
@@ -628,6 +646,10 @@ reference : string
 	<span class="md-text">Configurability</span>
 </h2>
 
+<p class="md-para md-block">
+<span class="md-text">Various aspects of the library are configurable. These can affect parsing and HTML code generation.</span>
+</p>
+
 <h3 id="class_prefix" class="md-header md-header3 md-block">
 	<code class="md-code">CLASS_PREFIX</code>
 </h3>
@@ -843,8 +865,4 @@ parse.CODE_SYM = &quot;`&quot;
 <div class="md-block-code md-block"><pre>
 parse.REFERENCE_SYM = &quot;@&quot;
 </pre></div>
-
-<p class="md-para md-block">
-<span class="md-text">``</span>
-</p>
 </div>

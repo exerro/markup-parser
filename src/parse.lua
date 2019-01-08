@@ -189,8 +189,8 @@ function formatBlock(lines)
 	elseif blockSym == parse.BLOCK_CODE_SYM then
 		return {
 			type = markup.BLOCK_CODE,
-			language = lines[1].content:match("([^\n]*)\n"),
-			content = lines[1].content:match("\n(.*)$")
+			language = lines[1].content:match("([^\n]+)\n"),
+			content = lines[1].content:match("\n(.*)$") or ""
 		}
 
 	elseif blockSym == parse.BLOCK_QUOTE_SYM then
@@ -470,7 +470,7 @@ function removeComments(text)
 		p = f + 1
 		s, f = text:find(code, p)
 		insert(output, text:sub(p, (s or #text + 1) - 1))
-		insert(output, code)
+		insert(output, f and code)
 		p = (f or #text) + 1
 		s, f = text:find("`+", p)
 	end

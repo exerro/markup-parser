@@ -49,6 +49,9 @@
 		* [Reference](#reference-inline)
 * [Configurability](#configurability)
 	* [`CLASS_PREFIX`](#class_prefix)
+	* [`LINE_COMMENT`](#line_comment)
+	* [`MULTILINE_COMMENT_OPEN`](#multiline_comment_open)
+	* [`MULTILINE_COMMENT_CLOSE`](#multiline_comment_close)
 	* [`HEADER_SYM`](#header_sym)
 	* [`LIST_SYM`](#list_sym)
 	* [`LIST_SYM2`](#list_sym2)
@@ -97,15 +100,15 @@ References are intended to refer to other documents within the current context, 
 
 ## Using the library
 
-To load the library, use:
+To load the library, use...
 
 ```lua
 local markup = require("src.markup")
 ```
 
-To load parsing capabilities, use
+To load parsing capabilities, use...
 
-```
+```lua
 local parse = require("src.parse")
 ```
 
@@ -121,10 +124,17 @@ Parses the markup text and returns its AST (a list of blocks).
 
 ## HTML output
 
+To load the HTML renderer, use...
+
+```lua
+local html = require("src.html")
+```
+
 #### html.render()
 
 ```
 string html.render(AST document, string[]? styles)
+string html.render(string document, string[]? styles)
 ```
 
 Renders the document to a HTML document. For any style in `styles`, that style is `@import`-ed automatically. For example, the following example would insert `@import url("css/style.css");` into the top of the rendered document.
@@ -354,6 +364,8 @@ reference : string
 ```
 
 ## Configurability
+
+Various aspects of the library are configurable. These can affect parsing and HTML code generation.
 
 ### `CLASS_PREFIX`
 

@@ -1,6 +1,8 @@
 
 local markup = require "src.markup"
 
+require "src.parse"
+
 local html = {}
 local highlighters = {}
 local resourceLoader
@@ -40,6 +42,10 @@ local listElements, listItemToHTML
 local map, indent
 
 function html.render(blocks, styles)
+	if type(blocks) == "string" then
+		blocks = markup.parse(blocks)
+	end
+
 	return "<style>\n"
 	.. indent(table.concat(map(function(s)
 		return "@import url(" .. ("%q"):format(s) .. ");"
