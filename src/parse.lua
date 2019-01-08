@@ -20,10 +20,14 @@ parse.VARIABLE_SYM = "$"
 parse.CODE_SYM = "`"
 parse.REFERENCE_SYM = "@"
 
+parse.LINE_COMMENT = "//"
+parse.MULTILINE_COMMENT_OPEN = "/-"
+parse.MULTILINE_COMMENT_CLOSE = "-/"
+
 parse.EMPTY = "empty"
 
 local toLines, formatCodeLines, makeBlocksFromEmptyLines, makeBlocksFromDifferentSyms, formatBlock
-local parseTextInline, applyItemInlines, applyItemInline, textFrom
+local parseTextInline, applyItemInlines, applyItemInline, textFrom, removeComments
 local findMatch
 local insert, last, map, flatMap, indexOf
 local remove = table.remove
@@ -31,7 +35,7 @@ local get
 local quote, patternEscape
 
 function markup.parse(content)
-	local lines = formatCodeLines(toLines(content))
+	local lines = formatCodeLines(toLines(removeComments(content)))
 	local blocks
 
 	for i = 1, #lines do
@@ -185,8 +189,8 @@ function formatBlock(lines)
 	elseif blockSym == parse.BLOCK_CODE_SYM then
 		return {
 			type = markup.BLOCK_CODE,
-			language = lines[1].content:match("([^\n]+)\n"),
-			content = lines[1].content:match("\n(.+)")
+			language = lines[1].content:match("([^\n]*)\n"),
+			content = lines[1].content:match("\n(.*)$")
 		}
 
 	elseif blockSym == parse.BLOCK_QUOTE_SYM then
@@ -445,6 +449,35 @@ function textFrom(inlines)
 			return textFrom(inline.content)
 		end
 	end, inlines))
+end
+
+function removeComments(text)
+	local p = 1
+	local output = {}
+	local s, f = text:find("`+")
+
+	local function strip(text)
+		return (text:gsub(patternEscape(parse.MULTILINE_COMMENT_OPEN) .. ".-" .. patternEscape(parse.MULTILINE_COMMENT_CLOSE), "")
+		            :gsub(patternEscape(parse.LINE_COMMENT) .. ".-\n", "\n")
+		            :gsub(patternEscape(parse.LINE_COMMENT) .. ".-$", ""))
+	end
+
+	while s do
+		local code = ("`"):rep(f - s + 1)
+
+		insert(output, strip(text:sub(p, s - 1)))
+		insert(output, code)
+		p = f + 1
+		s, f = text:find(code, p)
+		insert(output, text:sub(p, (s or #text + 1) - 1))
+		insert(output, code)
+		p = (f or #text) + 1
+		s, f = text:find("`+", p)
+	end
+
+	insert(output, strip(text:sub(p)))
+
+	return table.concat(output)
 end
 
 function findMatch(text, pos, patterns)

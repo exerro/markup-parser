@@ -20,6 +20,9 @@
 			<a class="md-link" href="#overview"><span class="md-text">Overview</span></a>
 		</li>
 		<li class="md-list-item">
+			<a class="md-link" href="#comments"><span class="md-text">Comments</span></a>
+		</li>
+		<li class="md-list-item">
 			<a class="md-link" href="#variables"><span class="md-text">Variables</span></a>
 		</li>
 		<li class="md-list-item">
@@ -204,6 +207,23 @@
 <span class="md-text">The core of the language is very similar to markdown.</span>
 </p>
 
+<h3 id="comments" class="md-header md-header3 md-block">
+	<span class="md-text">Comments</span>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">The language supports single-line and multi-line comments, using the following syntax:</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+&frasl;&frasl; single line comment
+</pre></div>
+
+<div class="md-block-code md-block"><pre>
+&frasl;- multi line
+comment -&frasl;
+</pre></div>
+
 <h3 id="variables" class="md-header md-header3 md-block">
 	<span class="md-text">Variables</span>
 </h3>
@@ -245,7 +265,7 @@ local markup = require(&quot;src.markup&quot;)
 </p>
 
 <div class="md-block-code md-block"><pre>
-local parse require(&quot;src.parse&quot;)
+local parse = require(&quot;src.parse&quot;)
 </pre></div>
 
 <h3 id="library-functions" class="md-header md-header3 md-block">
@@ -620,6 +640,42 @@ reference : string
 html.CLASS_PREFIX = &quot;md-&quot;
 </pre></div>
 
+<h3 id="line_comment" class="md-header md-header3 md-block">
+	<code class="md-code">LINE_COMMENT</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the line comment symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.LINE_COMMENT = &quot;&frasl;&frasl;&quot;
+</pre></div>
+
+<h3 id="multiline_comment_open" class="md-header md-header3 md-block">
+	<code class="md-code">MULTILINE_COMMENT_OPEN</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the multi-line comment opening symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.MULTILINE_COMMENT_OPEN = &quot;&frasl;-&quot;
+</pre></div>
+
+<h3 id="multiline_comment_close" class="md-header md-header3 md-block">
+	<code class="md-code">MULTILINE_COMMENT_CLOSE</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the multi-line comment closing symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.MULTILINE_COMMENT_CLOSE = &quot;-&frasl;&quot;
+</pre></div>
+
 <h3 id="header_sym" class="md-header md-header3 md-block">
 	<code class="md-code">HEADER_SYM</code>
 </h3>
@@ -787,4 +843,8 @@ parse.CODE_SYM = &quot;`&quot;
 <div class="md-block-code md-block"><pre>
 parse.REFERENCE_SYM = &quot;@&quot;
 </pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">``</span>
+</p>
 </div>

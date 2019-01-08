@@ -1,10 +1,16 @@
 
+/-
+	If you're seeing this, the document hasn't been rendered with the correct markdown renderer.
+	There may be slight issues in the body of the document as a result.
+-/
+
 # Using markup
 
 ### Contents
 
 * [The language](#the-language)
 	* [Overview](#overview)
+	* [Comments](#comments)
 	* [Variables](#variables)
 	* [Resources](#resources)
 	* [References](#references)
@@ -64,6 +70,19 @@
 
 The core of the language is very similar to markdown.
 
+### Comments
+
+The language supports single-line and multi-line comments, using the following syntax:
+
+```
+// single line comment
+```
+
+```
+/- multi line
+comment -/
+```
+
 ### Variables
 
 Variables are intended to act similar to `` `code` `` inlines, but specifically for referring to variables.
@@ -87,7 +106,7 @@ local markup = require("src.markup")
 To load parsing capabilities, use
 
 ```
-local parse require("src.parse")
+local parse = require("src.parse")
 ```
 
 ### Library functions
@@ -342,6 +361,30 @@ Defines the class prefix to prepend to all css classes when outputting html.
 
 ```
 html.CLASS_PREFIX = "md-"
+```
+
+### `LINE_COMMENT`
+
+Defines the line comment symbol.
+
+```
+parse.LINE_COMMENT = "//"
+```
+
+### `MULTILINE_COMMENT_OPEN`
+
+Defines the multi-line comment opening symbol.
+
+```
+parse.MULTILINE_COMMENT_OPEN = "/-"
+```
+
+### `MULTILINE_COMMENT_CLOSE`
+
+Defines the multi-line comment closing symbol.
+
+```
+parse.MULTILINE_COMMENT_CLOSE = "-/"
 ```
 
 ### `HEADER_SYM`
