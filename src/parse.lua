@@ -225,6 +225,7 @@ function parseTextInline(text)
 	local excluded = {}
 	local activeModifiers = {} -- currently active modifiers
 	local ignoreModifiersEnds = {} -- lookup table of modifier ends to ignore ("*_ abc * def _" is equivalent to "*_ abc _* def ")
+	local escaped = false
 
 	local function char(c)
 		if last(last(stack)) == nil or last(last(stack)).type ~= markup.TEXT then
@@ -235,7 +236,8 @@ function parseTextInline(text)
 	end
 
 	while i <= #text do
-		local s, f = findMatch(text, i, {
+		local escape = text:sub(i, i) == "\\"
+		local s, f = findMatch(text, i, not escape and {
 			"!?%b[]%b()",
 			"%[%[[^%]]+%]%]",
 			patternEscape(parse.REFERENCE_SYM) .. "[%w%-]+",
@@ -243,9 +245,17 @@ function parseTextInline(text)
 			patternEscape(parse.VARIABLE_SYM) .. "[%w%-]+",
 			patternEscape(parse.VARIABLE_SYM) .. "%b()",
 			{"`+", function(s) return s end}
-		})
+		} or {})
 
-		if s then
+		if escaped then
+			escaped = false
+			i = i + 1
+		elseif escape then
+			escaped = true
+			excluded[i] = true
+			excluded[i + 1] = true
+			i = i + 1
+		elseif s then
 			for n = s, f do
 				excluded[n] = true
 			end
@@ -263,8 +273,15 @@ function parseTextInline(text)
 	-- TODO: fix this shitty code
 	while i <= #text do
 		if excluded[i] then
-			char(text:sub(i, i))
-			i = i + 1
+			local c = text:sub(i, i)
+
+			if c == "\\" then
+				char(text:sub(i + 1, i + 1))
+				i = i + 2
+			else
+				char(c)
+				i = i + 1
+			end
 		else
 			local modifier
 
