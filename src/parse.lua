@@ -106,7 +106,7 @@
 		{
 			type = parse.REFERENCE,
 			content = inline-text             ; this is the text to display
-			target = T                        ; T is the string reference target
+			reference = T                     ; T is the string reference target
 		}
 
 ]]
@@ -461,28 +461,6 @@ function parseTextInline(text)
 	end
 
 	return applyItemInlines(result)
-
-	--[=[
-		
-		{ ![alt](src)
-			type = parse.IMAGE,
-			alt_text = A,                     ; A is the string alt-text to use
-			source = S                        ; S is the string source of the image
-		}
-
-		{ [display](link)
-			type = parse.LINK,
-			content = inline-text,            ; this is the text to display
-			url = U                           ; U is the string url target of the link
-		}
-
-		{ [[link]]
-			type = parse.RELATIVE_LINK,
-			content = inline-text,            ; this is the text to display
-			url = U                           ; U is the string url target of the link
-		}
-
-	]=]
 end
 
 function applyItemInlines(inlines)
@@ -554,7 +532,7 @@ function applyItemInline(inline)
 
 				if content then
 					insert(items, { type = parse.LINK, content = parseTextInline(content:sub(2, -2)), url = url:sub(2, -2) } )
-					i = i + 1 + #content + #url
+					i = i + #content + #url
 				else
 					append("[")
 				end
@@ -571,7 +549,7 @@ function applyItemInline(inline)
 					insert(items, {
 						type = parse.REFERENCE,
 						content = parsed,
-						target = textFrom(parsed)
+						reference = textFrom(parsed)
 					})
 				else
 					append(parse.REFERENCE_SYM:sub(1, 1))
@@ -608,7 +586,9 @@ function findMatch(text, pos, patterns)
 
 		if s then
 			if type(patterns[i]) == "table" then
-				return s, select(2, text:find("^" .. patterns[i][2](text:sub(s, f)), f + 1))
+				if text:find("^" .. patterns[i][2](text:sub(s, f)), f + 1) then
+					return s, select(2, text:find("^" .. patterns[i][2](text:sub(s, f)), f + 1))
+				end
 			else
 				return s, f
 			end

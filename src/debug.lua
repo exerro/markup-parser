@@ -76,7 +76,7 @@ function debug.printInline(text)
 		return "[[" .. debug.printInlineList(text.content) .. "]](" .. text.url .. ")"
 
 	elseif text.type == parse.REFERENCE then
-		return "@(" .. debug.printInlineList(text.content) .. ")"
+		return "@(" .. debug.printInlineList(text.content) .. " :: " .. text.reference .. ")"
 
 	end
 
