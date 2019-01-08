@@ -87,6 +87,8 @@ stuff
 
 ]=])
 
+html.setRelativeLinkFormatter(html.defaultRelativeLinkFormatter)
+
 local h = io.open("out.html", "w")
 h:write("<style> @import url('src/style.css'); @import url('global-style.css'); </style>")
 h:write(html.blocksToHTML(result))

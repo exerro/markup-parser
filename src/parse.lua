@@ -1,139 +1,7 @@
 
---[[
-
-	parse.parse(content) will return a list of "blocks"
-	note that `inline-text` represents the inline text format, which is described below
-	a block is one of the following:
-
-		{
-			type = parse.PARAGRAPH,
-			content = inline-text
-		}
-
-		{
-			type = parse.HEADER,
-			size = N                          ; N is an integer 1-6 inclusive representing how "big" the header is (1 being largest)
-			content = inline-text
-		}
-
-		{
-			type = parse.LIST,
-			items = {
-				[n] = {                       ; n is an integer 1 to N where N is the number of items in the list
-					content = inline-text,
-					level = L                 ; L is the level at which the item is shown, e.g. 1 for indented once, 0 for no indentation
-				}
-			}
-		}
-
-		{
-			type = parse.BLOCK_CODE,
-			language = L,                     ; L is an optional string language which the code is in (may be nil)
-			content = S                       ; S is the string content of the code
-		}
-
-		{
-			type = parse.BLOCK_QUOTE,
-			content = {
-				[n] = block                   ; n is an integer 1 to N where N is the number of blocks in the list
-			}
-		}
-
-		{
-			type = parse.RESOURCE,
-			resource = R                      ; R is a string representing the resource to insert
-		}
-
-		{
-			type = parse.HORIZONTAL_RULE
-		}
-
-	the inline text format is a list of items as follows:
-
-		{
-			type = parse.TEXT,
-			content = S                       ; S is the string content of the text
-		}
-
-		{
-			type = parse.VARIABLE,
-			variable = V                      ; V is the string variable name
-		}
-
-		{
-			type = parse.CODE,
-			content = S                       ; S is the string content of the code
-		}
-
-		{
-			type = parse.UNDERLINE,
-			content = inline-text
-		}
-
-		{
-			type = parse.BOLD,
-			content = inline-text
-		}
-
-		{
-			type = parse.ITALIC,
-			content = inline-text
-		}
-
-		{
-			type = parse.STRIKETHROUGH,
-			content = inline-text
-		}
-
-		{
-			type = parse.IMAGE,
-			alt_text = A,                     ; A is the string alt-text to use
-			source = S                        ; S is the string source of the image
-		}
-
-		{
-			type = parse.LINK,
-			content = inline-text,            ; this is the text to display
-			url = U                           ; U is the string url target of the link
-		}
-
-		{
-			type = parse.RELATIVE_LINK,
-			content = inline-text,            ; this is the text to display
-			url = U                           ; U is the string url target of the link
-		}
-
-		{
-			type = parse.REFERENCE,
-			content = inline-text             ; this is the text to display
-			reference = T                     ; T is the string reference target
-		}
-
-]]
+local markup = require "src.markup"
 
 local parse = {}
-
--- inline types
-parse.TEXT = "text"
-parse.VARIABLE = "variable"
-parse.CODE = "code"
-parse.UNDERLINE = "underline"
-parse.BOLD = "bold"
-parse.ITALIC = "italic"
-parse.STRIKETHROUGH = "strikethrough"
-parse.IMAGE = "image"
-parse.LINK = "link"
-parse.RELATIVE_LINK = "relative-link"
-parse.REFERENCE = "reference"
-
--- block types
-parse.PARAGRAPH = "paragraph"
-parse.HEADER = "header"
-parse.LIST = "list"
-parse.BLOCK_CODE = "block-code"
-parse.BLOCK_QUOTE = "block-quote"
-parse.RESOURCE = "resource"
-parse.HORIZONTAL_RULE = "horizontal-rule"
 
 -- symbols
 parse.HEADER_SYM = "#"
@@ -292,20 +160,20 @@ function formatBlock(lines)
 
 	if blockSym == "" then
 		return {
-			type = parse.PARAGRAPH,
+			type = markup.PARAGRAPH,
 			content = parseTextInline(table.concat(map(get("content"), lines), "\n"))
 		}
 
 	elseif blockSym:find(parse.HEADER_SYM) then
 		return {
-			type = parse.HEADER,
+			type = markup.HEADER,
 			size = math.max(1, math.min(6, #blockSym)),
 			content = parseTextInline(lines[1].content)
 		}
 
 	elseif blockSym == parse.LIST_SYM or blockSym == parse.LIST_SYM2 then
 		return {
-			type = parse.LIST,
+			type = markup.LIST,
 			items = map(function(line)
 				return {
 					content = parseTextInline(line.content),
@@ -316,26 +184,26 @@ function formatBlock(lines)
 
 	elseif blockSym == parse.CODE_SYM then
 		return {
-			type = parse.BLOCK_CODE,
+			type = markup.BLOCK_CODE,
 			language = lines[1].content:match("([^\n]+)\n"),
 			content = lines[1].content:match("\n(.+)")
 		}
 
 	elseif blockSym == parse.BLOCK_QUOTE_SYM then
 		return {
-			type = parse.BLOCK_QUOTE,
+			type = markup.BLOCK_QUOTE,
 			content = parse.parse(table.concat(map(get("content"), lines), "\n"))
 		}
 
 	elseif blockSym == parse.RESOURCE_SYM then
 		return {
-			type = parse.RESOURCE,
+			type = markup.RESOURCE,
 			resource = lines[1].content
 		}
 
 	elseif blockSym == parse.RULE_SYM then
 		return {
-			type = parse.HORIZONTAL_RULE
+			type = markup.HORIZONTAL_RULE
 		}
 
 	else
@@ -355,11 +223,11 @@ function parseTextInline(text)
 	local ignoreModifiersEnds = {} -- lookup table of modifier ends to ignore ("*_ abc * def _" is equivalent to "*_ abc _* def ")
 
 	local function char(c)
-		if last(last(stack)) == nil or last(last(stack)).type ~= parse.TEXT then
-			insert(last(stack), { type = parse.TEXT, content = "" })
+		if last(last(stack)) == nil or last(last(stack)).type ~= markup.TEXT then
+			insert(last(stack), { type = markup.TEXT, content = "" })
 		end
 
-		insert(last(stack), { type = parse.TEXT, content = remove(last(stack)).content .. c })
+		insert(last(stack), { type = markup.TEXT, content = remove(last(stack)).content .. c })
 	end
 
 	while i <= #text do
@@ -430,16 +298,16 @@ function parseTextInline(text)
 					insert(activeModifiers, modifier)
 
 					if modifier == parse.UNDERLINE_SYM then
-						type = parse.UNDERLINE
+						type = markup.UNDERLINE
 
 					elseif modifier == parse.BOLD_SYM then
-						type = parse.BOLD
+						type = markup.BOLD
 
 					elseif modifier == parse.ITALIC_SYM then
-						type = parse.ITALIC
+						type = markup.ITALIC
 
 					elseif modifier == parse.STRIKETHROUGH_SYM then
-						type = parse.STRIKETHROUGH
+						type = markup.STRIKETHROUGH
 					end
 
 					local item = {
@@ -468,17 +336,17 @@ function applyItemInlines(inlines)
 end
 
 function applyItemInline(inline)
-	if inline.type == parse.TEXT then
+	if inline.type == markup.TEXT then
 		local text = inline.content
 		local i = 1
 		local items = {}
 
 		local function append(c)
-			if last(items) == nil or last(items).type ~= parse.TEXT then
-				insert(items, {type = parse.TEXT, content = "" })
+			if last(items) == nil or last(items).type ~= markup.TEXT then
+				insert(items, {type = markup.TEXT, content = "" })
 			end
 
-			insert(items, { type = parse.TEXT, content = remove(items).content .. c })
+			insert(items, { type = markup.TEXT, content = remove(items).content .. c })
 			i = i + 1
 		end
 
@@ -489,7 +357,7 @@ function applyItemInline(inline)
 
 				if s then
 					i = i + #s + #parse.VARIABLE_SYM
-					insert(items, { type = parse.VARIABLE, variable = bracket and s:sub(2, -2) or s })
+					insert(items, { type = markup.VARIABLE, variable = bracket and s:sub(2, -2) or s })
 				else
 					append(parse.VARIABLE_SYM:sub(1, 1))
 				end
@@ -499,7 +367,7 @@ function applyItemInline(inline)
 				local pos = text:find(parse.CODE_SYM:rep(len), i + len)
 
 				if pos then
-					insert(items, { type = parse.CODE, content = text:sub(i + len, pos - 1) })
+					insert(items, { type = markup.CODE, content = text:sub(i + len, pos - 1) })
 					i = pos + len
 				else
 					append(parse.CODE_SYM)
@@ -509,7 +377,7 @@ function applyItemInline(inline)
 				local alt, source = text:match("^!(%b[])(%b())", i)
 
 				if alt then
-					insert(items, { type = parse.IMAGE, alt_text = alt:sub(2, -2), source = source:sub(2, -2) } )
+					insert(items, { type = markup.IMAGE, alt_text = alt:sub(2, -2), source = source:sub(2, -2) } )
 					i = i + 1 + #alt + #source
 				else
 					append("!")
@@ -521,7 +389,7 @@ function applyItemInline(inline)
 				if inner then
 					local parsed = parseTextInline(inner)
 
-					insert(items, { type = parse.RELATIVE_LINK, content = parsed, url = textFrom(parsed) } )
+					insert(items, { type = markup.RELATIVE_LINK, content = parsed, url = textFrom(parsed) } )
 					i = i + 4 + #inner
 				else
 					append("[")
@@ -531,7 +399,7 @@ function applyItemInline(inline)
 				local content, url = text:match("^(%b[])(%b())", i)
 
 				if content then
-					insert(items, { type = parse.LINK, content = parseTextInline(content:sub(2, -2)), url = url:sub(2, -2) } )
+					insert(items, { type = markup.LINK, content = parseTextInline(content:sub(2, -2)), url = url:sub(2, -2) } )
 					i = i + #content + #url
 				else
 					append("[")
@@ -547,7 +415,7 @@ function applyItemInline(inline)
 					parsed = parseTextInline(bracket and s:sub(2, -2) or s)
 
 					insert(items, {
-						type = parse.REFERENCE,
+						type = markup.REFERENCE,
 						content = parsed,
 						reference = textFrom(parsed)
 					})
@@ -569,11 +437,11 @@ end
 
 function textFrom(inlines)
 	return table.concat(map(function(inline)
-		if inline.type == parse.TEXT then
+		if inline.type == markup.TEXT then
 			return inline.content
-		elseif inline.type == parse.CODE then
+		elseif inline.type == markup.CODE then
 			return inline.content
-		elseif inline.type == parse.UNDERLINE or inline.type == parse.BOLD or inline.type == parse.ITALIC or inline.type == parse.STRIKETHROUGH then
+		elseif inline.type == markup.UNDERLINE or inline.type == markup.BOLD or inline.type == markup.ITALIC or inline.type == markup.STRIKETHROUGH then
 			return textFrom(inline.content)
 		end
 	end, inlines))

@@ -1,35 +1,35 @@
 
-local parse = require "src.parse"
+local markup = require "src.markup"
 
 --[[
 		{
-			type = parse.UNDERLINE,
+			type = markup.UNDERLINE,
 			content = inline-text
 		}
 
 		{
-			type = parse.BOLD,
+			type = markup.BOLD,
 			content = inline-text
 		}
 
 		{
-			type = parse.ITALIC,
+			type = markup.ITALIC,
 			content = inline-text
 		}
 
 		{
-			type = parse.STRIKETHROUGH,
+			type = markup.STRIKETHROUGH,
 			content = inline-text
 		}
 
 		{
-			type = parse.RELATIVE_LINK,
+			type = markup.RELATIVE_LINK,
 			content = inline-text,            ; this is the text to display
 			url = U                           ; U is the string url target of the link
 		}
 
 		{
-			type = parse.REFERENCE,
+			type = markup.REFERENCE,
 			content = inline-text             ; this is the text to display
 			target = T                        ; T is the string reference target
 		}
@@ -67,7 +67,7 @@ html.LINK = "~link"
 html.REFERENCE = "~reference"
 
 local getClass
-local map, flatMap, get, indent
+local map, indent
 
 function html.blocksToHTML(blocks)
 	return table.concat(map(html.blockToHTML, blocks), "\n\n")
@@ -75,24 +75,24 @@ end
 
 function html.blockToHTML(block)
 
-	if block.type == parse.PARAGRAPH then
+	if block.type == markup.PARAGRAPH then
 		return "<p class=\"" .. getClass(html.PARAGRAPH) .. "\">\n"
 		.. indent(html.inlinesToHTML(block.content):gsub("\n", "<br>"))
 		.. "\n</p>"
 
-	elseif block.type == parse.HEADER then
+	elseif block.type == markup.HEADER then
 		local content = html.inlinesToHTML(block.content)
 
 		return "<h" .. block.size .. " id=\"" .. content:gsub("<.->", ""):gsub("^%s+", ""):gsub("%s+$", ""):gsub("(%s)%s+", "%1"):gsub("%W", "-") .. "\" class=\"" .. getClass(html.HEADER) .. " " .. getClass(html.HEADER) .. block.size .. "\">\n"
 		.. indent(content)
 		.. "\n</h" .. block.size .. ">"
 
-	elseif block.type == parse.LIST then
+	elseif block.type == markup.LIST then
 		return "<ul class=\"" .. getClass(html.LIST) .. "\">\n"
 		.. table.concat(map(html.listItemToHTML, block.items), "\n")
 		.. "\n</ul>"
 
-	elseif block.type == parse.BLOCK_CODE then
+	elseif block.type == markup.BLOCK_CODE then
 		local lang = block.language:lower()
 
 		if highlighters[lang] then
@@ -104,19 +104,19 @@ function html.blockToHTML(block)
 		.. block.content
 		.. "\n</pre>", lang)
 
-	elseif block.type == parse.BLOCK_QUOTE then
+	elseif block.type == markup.BLOCK_QUOTE then
 		return "<div class=\"" .. getClass(html.BLOCK_QUOTE) .. "\">\n"
 		.. indent(html.blocksToHTML(block.content))
 		.. "\n</div>"
 
-	elseif block.type == parse.RESOURCE then
+	elseif block.type == markup.RESOURCE then
 		if resourceLoader then
 			return tostring(resourceLoader(block.resource))
 		else
 			return "<p class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no resource loader for '" .. block.resource .. "' :( &gt;</p>"
 		end
 
-	elseif block.type == parse.HORIZONTAL_RULE then
+	elseif block.type == markup.HORIZONTAL_RULE then
 		return "<hr class=\"" .. getClass(html.HORIZONTAL_RULE) .. "\">"
 
 	else
@@ -137,49 +137,49 @@ function html.inlinesToHTML(inlines)
 end
 
 function html.inlineToHTML(inline)
-	if inline.type == parse.TEXT then
+	if inline.type == markup.TEXT then
 		return "<span class=\"" .. getClass(html.TEXT) .. "\">" .. inline.content .. "</span>"
 
-	elseif inline.type == parse.VARIABLE then
+	elseif inline.type == markup.VARIABLE then
 		return "<span class=\"" .. getClass(html.VARIABLE) .. "\">" .. inline.variable .. "</span>"
 
-	elseif inline.type == parse.CODE then
+	elseif inline.type == markup.CODE then
 		return "<span class=\"" .. getClass(html.CODE) .. "\">" .. inline.content .. "</span>"
 
-	elseif inline.type == parse.UNDERLINE then
+	elseif inline.type == markup.UNDERLINE then
 		return "<u class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
 		.. "</u>"
 
-	elseif inline.type == parse.BOLD then
+	elseif inline.type == markup.BOLD then
 		return "<strong class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
 		.. "</strong>"
 
-	elseif inline.type == parse.ITALIC then
+	elseif inline.type == markup.ITALIC then
 		return "<i class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
 		.. "</i>"
 
-	elseif inline.type == parse.STRIKETHROUGH then
+	elseif inline.type == markup.STRIKETHROUGH then
 		return "<del class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
 		.. html.inlinesToHTML(inline.content)
 		.. "</del>"
 
-	elseif inline.type == parse.IMAGE then
+	elseif inline.type == markup.IMAGE then
 		return "<img class=\"" .. getClass(html.IMAGE) .. "\" alt=\"" .. inline.alt_text .. "\" src=\"" .. inline.source .. "\">"
 
-	elseif inline.type == parse.LINK then
+	elseif inline.type == markup.LINK then
 		return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. inline.url .. "\">" .. html.inlinesToHTML(inline.content) .. "</a>"
 
-	elseif inline.type == parse.RELATIVE_LINK then
+	elseif inline.type == markup.RELATIVE_LINK then
 		if relativeLinkFormatter then
-			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. relativeLinkFormatter(inline.url) .. "\">" .. inline.content .. "</a>"
+			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. relativeLinkFormatter(inline.url) .. "\">" .. html.inlinesToHTML(inline.content) .. "</a>"
 		else
 			return "<span class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no relative link formatter for '" .. inline.url .. "' :( &gt;</span>"
 		end
 
-	elseif inline.type == parse.REFERENCE then
+	elseif inline.type == markup.REFERENCE then
 		if referenceFormatter then
 			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. referenceFormatter(inline.reference) .. "\">" .. inline.content .. "</a>"
 		else
@@ -209,6 +209,9 @@ function html.setReferenceFormatter(formatter)
 	referenceFormatter = formatter
 end
 
+function html.defaultRelativeLinkFormatter(link)
+	return link
+end
 
 function getClass(s)
 	return s:gsub("~", html.CLASS_PREFIX)
@@ -222,26 +225,6 @@ function map(f, list)
 	end
 
 	return result
-end
-
-function flatMap(f, list)
-	local result = {}
-
-	for i = 1, #list do
-		local r = f(list[i])
-
-		for j = 1, #r do
-			insert(result, r[j])
-		end
-	end
-
-	return result
-end
-
-function get(index)
-	return function(object)
-		return object[index]
-	end
 end
 
 function indent(text)
