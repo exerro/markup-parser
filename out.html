@@ -1,51 +1,790 @@
-<style> @import url('src/style.css'); @import url('global-style.css'); </style><h1 id="Header" class="md-header md-header1">
-	<span class="md-text">Header</span>
+<style>
+	@import url("src/style.css");
+	@import url("global-style.css");
+</style>
+<div class="md-content">
+<h1 id="using-markup" class="md-header md-header1 md-block">
+	<span class="md-text">Using markup</span>
 </h1>
 
-<h2 id="hello" class="md-header md-header2">
-	<span class="md-text">hello</span>
-</h2>
-
-<p class="md-para">
-	<span class="md-text">This is nothing</span>
-</p>
-
-<div class="md-block-quote">
-	<p class="md-para">
-		<span class="md-format-error">&lt; no reference formatter for 'ref' :( &gt;</span><span class="md-text"> </span><span class="md-variable">var</span><span class="md-text"> </span><a class="md-link" href="hello"><span class="md-code">hello</span></a><span class="md-text"> </span><span class="md-code">code</span><span class="md-text"> </span><del class="md-strikethrough"><span class="md-text">strikethrough</span></del><span class="md-text"> </span><i class="md-strikethrough"><span class="md-text">italic</span></i><span class="md-text"> </span><strong class="md-strikethrough"><span class="md-text">bold</span></strong><span class="md-text"> </span><u class="md-strikethrough"><span class="md-text">underlined</span></u><span class="md-text"><br></span><img class="md-image" alt="alt" src="src"><span class="md-text"><br></span><a class="md-link" href="hello"><span class="md-text">link text</span></a>
-	</p>
-</div>
-
-<ul class="md-list">
-<li class="md-list-item">
-<span class="md-text">list item 1</span>
-</li>
-<li class="md-list-item">
-<span class="md-text">list item 2</span>
-</li>
-<li class="md-list-item">
-<span class="md-text">list item 3</span>
-</li>
-</ul>
-
-<hr class="md-hr">
-
-<p class="md-format-error">&lt; no resource loader for 'interactive code' :( &gt;</p>
-
-<p class="md-block-code"><pre>
-this is
-
-some code
-</pre></p>
-
-<h3 id="hello-world" class="md-header md-header3">
-	<del class="md-strikethrough"><span class="md-text">  hello world</span></del>
+<h3 id="contents" class="md-header md-header3 md-block">
+	<span class="md-text">Contents</span>
 </h3>
 
-<p class="md-para">
-	<span class="md-text">more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff<br>more<br>stuff</span>
+<ul class="md-list md-block">
+	<li class="md-list-item">
+		<a class="md-link" href="#the-language"><span class="md-text">The language</span></a>
+	</li>
+	<ul class="md-list">
+		<li class="md-list-item">
+			<a class="md-link" href="#overview"><span class="md-text">Overview</span></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#variables"><span class="md-text">Variables</span></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#resources"><span class="md-text">Resources</span></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#references"><span class="md-text">References</span></a>
+		</li>
+	</ul>
+	<li class="md-list-item">
+		<a class="md-link" href="#using-the-library"><span class="md-text">Using the library</span></a>
+	</li>
+	<ul class="md-list">
+		<li class="md-list-item">
+			<a class="md-link" href="#library-functions"><span class="md-text">Library functions</span></a>
+		</li>
+		<ul class="md-list">
+			<li class="md-list-item">
+				<a class="md-link" href="#markup-parse"><code class="md-code">markup.parse</code></a>
+			</li>
+		</ul>
+	</ul>
+	<li class="md-list-item">
+		<a class="md-link" href="#html-output"><span class="md-text">HTML output</span></a>
+	</li>
+	<ul class="md-list">
+		<li class="md-list-item">
+			<a class="md-link" href="#html-render"><code class="md-code">html.render()</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#html-escape"><code class="md-code">html.escape()</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#html-codeenclose"><code class="md-code">html.codeEnclose()</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#html-setsyntaxhighligher"><code class="md-code">html.setSyntaxHighligher()</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#html-setresourceloader"><code class="md-code">html.setResourceLoader()</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#html-setrelativelinkformatter"><code class="md-code">html.setRelativeLinkFormatter()</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#html-setreferenceformatter"><code class="md-code">html.setReferenceFormatter()</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#html-defaultrelativelinkformatter"><code class="md-code">html.defaultRelativeLinkFormatter()</code></a>
+		</li>
+	</ul>
+	<li class="md-list-item">
+		<a class="md-link" href="#ast-structure"><span class="md-text">AST structure</span></a>
+	</li>
+	<ul class="md-list">
+		<li class="md-list-item">
+			<a class="md-link" href="#blocks"><span class="md-text">Blocks</span></a>
+		</li>
+		<ul class="md-list">
+			<li class="md-list-item">
+				<a class="md-link" href="#paragraph-block"><span class="md-text">Paragraph block</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#header-block"><span class="md-text">Header block</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#list-block"><span class="md-text">List block</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#code-block"><span class="md-text">Code block</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#block-quote"><span class="md-text">Block quote</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#resource-block"><span class="md-text">Resource block</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#horizontal-rule"><span class="md-text">Horizontal rule</span></a>
+			</li>
+		</ul>
+		<li class="md-list-item">
+			<a class="md-link" href="#inlines"><span class="md-text">Inlines</span></a>
+		</li>
+		<ul class="md-list">
+			<li class="md-list-item">
+				<a class="md-link" href="#text-inline"><span class="md-text">Text</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#variable-inline"><span class="md-text">Variable</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#code-inline"><span class="md-text">Code</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#underline-inline"><span class="md-text">Underline</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#bold-inline"><span class="md-text">Bold</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#italic-inline"><span class="md-text">Italic</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#strikethrough-inline"><span class="md-text">Strikethrough</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#image-inline"><span class="md-text">Image</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#link-inline"><span class="md-text">Link</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#relative-link-inline"><span class="md-text">Relative link</span></a>
+			</li>
+			<li class="md-list-item">
+				<a class="md-link" href="#reference-inline"><span class="md-text">Reference</span></a>
+			</li>
+		</ul>
+	</ul>
+	<li class="md-list-item">
+		<a class="md-link" href="#configurability"><span class="md-text">Configurability</span></a>
+	</li>
+	<ul class="md-list">
+		<li class="md-list-item">
+			<a class="md-link" href="#class_prefix"><code class="md-code">CLASS_PREFIX</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#header_sym"><code class="md-code">HEADER_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#list_sym"><code class="md-code">LIST_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#list_sym2"><code class="md-code">LIST_SYM2</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#rule_sym"><code class="md-code">RULE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#block_code_sym"><code class="md-code">BLOCK_CODE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#block_quote_sym"><code class="md-code">BLOCK_QUOTE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#resource_sym"><code class="md-code">RESOURCE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#underline_sym"><code class="md-code">UNDERLINE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#bold_sym"><code class="md-code">BOLD_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#italic_sym"><code class="md-code">ITALIC_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#strikethrough_sym"><code class="md-code">STRIKETHROUGH_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#variable_sym"><code class="md-code">VARIABLE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#code_sym"><code class="md-code">CODE_SYM</code></a>
+		</li>
+		<li class="md-list-item">
+			<a class="md-link" href="#reference_sym"><code class="md-code">REFERENCE_SYM</code></a>
+		</li>
+	</ul>
+</ul>
+
+<h2 id="the-language" class="md-header md-header2 md-block">
+	<span class="md-text">The language</span>
+</h2>
+
+<h3 id="overview" class="md-header md-header3 md-block">
+	<span class="md-text">Overview</span>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">The core of the language is very similar to markdown.</span>
 </p>
 
-<h1 id="last" class="md-header md-header1">
-	<span class="md-text">last</span>
-</h1>
+<h3 id="variables" class="md-header md-header3 md-block">
+	<span class="md-text">Variables</span>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Variables are intended to act similar to </span><code class="md-code"> `code` </code><span class="md-text"> inlines, but specifically for referring to variables.</span>
+</p>
+
+<h3 id="resources" class="md-header md-header3 md-block">
+	<span class="md-text">Resources</span>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Due to the extensible nature of the library, resources are intended to be arbitrary sections in the document. They won't render anything by default. Any custom sections in the document, for example an interactive area, should use a resource.</span>
+</p>
+
+<h3 id="references" class="md-header md-header3 md-block">
+	<span class="md-text">References</span>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">References are intended to refer to other documents within the current context, for example within an application, website, or wiki. Similar to relative links, references embed an </span><code class="md-code">&lt;a&gt;</code><span class="md-text"> tag in the document when rendered. The difference is that the link url must first pass through a reference formatter, turning the reference into a URL.</span>
+</p>
+
+<h2 id="using-the-library" class="md-header md-header2 md-block">
+	<span class="md-text">Using the library</span>
+</h2>
+
+<p class="md-para md-block">
+<span class="md-text">To load the library, use:</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+local markup = require(&quot;src.markup&quot;)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">To load parsing capabilities, use</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+local parse require(&quot;src.parse&quot;)
+</pre></div>
+
+<h3 id="library-functions" class="md-header md-header3 md-block">
+	<span class="md-text">Library functions</span>
+</h3>
+
+<h4 id="markup-parse" class="md-header md-header4 md-block">
+	<span class="md-text">markup.parse()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+AST markup.parse(string markup_text)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Parses the markup text and returns its AST (a list of blocks).</span>
+</p>
+
+<h2 id="html-output" class="md-header md-header2 md-block">
+	<span class="md-text">HTML output</span>
+</h2>
+
+<h4 id="html-render" class="md-header md-header4 md-block">
+	<span class="md-text">html.render()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+string html.render(AST document, string[]? styles)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Renders the document to a HTML document. For any style in </span><code class="md-code">styles</code><span class="md-text">, that style is </span><code class="md-code">@import</code><span class="md-text">-ed automatically. For example, the following example would insert </span><code class="md-code">@import url(&quot;css&frasl;style.css&quot;);</code><span class="md-text"> into the top of the rendered document.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+html.render(document, {&quot;css&frasl;style.css&quot;})
+</pre></div>
+
+<h4 id="html-escape" class="md-header md-header4 md-block">
+	<span class="md-text">html.escape()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+string html.escape(string text)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Returns the html-escaped version of </span><code class="md-code">text</code><span class="md-text">. For example, </span><code class="md-code">html.escape(&quot;&lt;a&gt;&quot;)</code><span class="md-text"> returns </span><code class="md-code">&quot;&amp;lt;a&amp;gt;&quot;</code><span class="md-text">.</span>
+</p>
+
+<h4 id="html-codeenclose" class="md-header md-header4 md-block">
+	<span class="md-text">html.codeEnclose()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+string html.codeEnclose(string text, string language)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Encloses the text given in a code block (a </span><code class="md-code">div</code><span class="md-text"> with correct classes).</span>
+</p>
+
+<h4 id="html-setsyntaxhighligher" class="md-header md-header4 md-block">
+	<span class="md-text">html.setSyntaxHighligher()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+html.setSyntaxHighligher(string language, (string -&gt; string) highlighter)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Sets the syntax highlighter for a language. The highlighter is a function that should return highlighted HTML code for its input.</span>
+</p>
+
+<blockquote class="md-block-quote md-block">
+<p class="md-para md-block">
+<span class="md-text">Note that no formatting is done if there is a highlighter for a language. What is returned is what is rendered. Use </span><a class="md-link" href="#html.codeenclose"><code class="md-code">html.codeEnclose()</code></a><span class="md-text"> to wrap the returned value in a properly formatted </span><code class="md-code">div</code><span class="md-text">.</span>
+</p>
+</blockquote>
+
+<h4 id="html-setresourceloader" class="md-header md-header4 md-block">
+	<span class="md-text">html.setResourceLoader()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+html.setResourceLoader((string -&gt; string) loader)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Sets the resource loader. The loader is a function that should return HTML code for its input (the resource identifier).</span>
+</p>
+
+<blockquote class="md-block-quote md-block">
+<p class="md-para md-block">
+<span class="md-text">Note that the returned string is wrapped in a </span><code class="md-code">div</code><span class="md-text"> element with class </span><code class="md-code">md-block</code><span class="md-text">.</span>
+</p>
+</blockquote>
+
+<h4 id="html-setrelativelinkformatter" class="md-header md-header4 md-block">
+	<span class="md-text">html.setRelativeLinkFormatter()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+html.setRelativeLinkFormatter((string -&gt; string) formatter)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Sets the relative link formatter. The formatter is a function that should return the URL of the given relative link.</span>
+</p>
+
+<blockquote class="md-block-quote md-block">
+<p class="md-para md-block">
+<span class="md-text">Note the existence of </span><a class="md-link" href="#html-defaultrelativelinkformatter"><code class="md-code">html.defaultRelativeLinkFormatter</code></a><span class="md-text">.</span>
+</p>
+</blockquote>
+
+<h4 id="html-setreferenceformatter" class="md-header md-header4 md-block">
+	<span class="md-text">html.setReferenceFormatter()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+html.setReferenceFormatter((string -&gt; string) formatter)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Sets the reference formatter. The formatter is a function that should return the URL of the given reference.</span>
+</p>
+
+<h4 id="html-defaultrelativelinkformatter" class="md-header md-header4 md-block">
+	<span class="md-text">html.defaultRelativeLinkFormatter()</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+string html.defaultRelativeLinkFormatter(string link)
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">Is the identity function (returns its input).</span>
+</p>
+
+<h2 id="ast-structure" class="md-header md-header2 md-block">
+	<span class="md-text">AST structure</span>
+</h2>
+
+<p class="md-para md-block">
+<span class="md-text">The AST is comprised of blocks and inline text items.</span>
+</p>
+
+<h3 id="blocks" class="md-header md-header3 md-block">
+	<span class="md-text">Blocks</span>
+</h3>
+
+<h4 id="paragraph-block" class="md-header md-header4 md-block">
+	<span class="md-text">Paragraph block</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.PARAGRAPH
+content : inline-text-item[]
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">The content of the paragraph, formatted as a list of inline text items.</span>
+</p>
+
+<h4 id="header-block" class="md-header md-header4 md-block">
+	<span class="md-text">Header block</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.HEADER
+size : [1, 6]
+content : inline-text-item[]
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">The content of a header. </span><code class="md-code">size</code><span class="md-text"> ranges between 1 and 6, equal to the size of the header (</span><code class="md-code">h1</code><span class="md-text">, </span><code class="md-code">h3</code><span class="md-text">, </span><code class="md-code">h6</code><span class="md-text"> etc).</span>
+</p>
+
+<h4 id="list-block" class="md-header md-header4 md-block">
+	<span class="md-text">List block</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.LIST
+items : {
+	[n] : {
+		content : inline-text-item[]
+		level : int
+	}
+}
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">The content of a list. Each numerically indexed item (</span><code class="md-code">1 .. #items</code><span class="md-text">) is a table containing the content of that item, and its indentation (</span><code class="md-code">level</code><span class="md-text">).</span>
+</p>
+
+<h4 id="code-block" class="md-header md-header4 md-block">
+	<span class="md-text">Code block</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.BLOCK_CODE
+language : string?
+content : string
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">The content of a code block. Language may be </span><code class="md-code">nil</code><span class="md-text">.</span>
+</p>
+
+<h4 id="block-quote" class="md-header md-header4 md-block">
+	<span class="md-text">Block quote</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.BLOCK_QUOTE
+content : block[]
+</pre></div>
+
+<p class="md-para md-block">
+<span class="md-text">The content of a block quote. </span><code class="md-code">content</code><span class="md-text"> is a list of blocks.</span>
+</p>
+
+<h4 id="resource-block" class="md-header md-header4 md-block">
+	<span class="md-text">Resource block</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.RESOURCE
+resource : string
+</pre></div>
+
+<p class="md-para md-block">
+<code class="md-code">resource</code><span class="md-text"> is the string representing the resource to load. See </span><a class="md-link" href="#resources"><span class="md-text">resources</span></a><span class="md-text">.</span>
+</p>
+
+<h4 id="horizontal-rule" class="md-header md-header4 md-block">
+	<span class="md-text">Horizontal rule</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.HORIZONTAL_RULE
+</pre></div>
+
+<h3 id="inlines" class="md-header md-header3 md-block">
+	<span class="md-text">Inlines</span>
+</h3>
+
+<blockquote class="md-block-quote md-block">
+<p class="md-para md-block">
+<span class="md-text">Most inlines are self explanatory and therefore have no description.</span>
+</p>
+</blockquote>
+
+<h4 id="text-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Text (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.TEXT
+content : string
+</pre></div>
+
+<h4 id="variable-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Variable (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.VARIABLE
+variable : string
+</pre></div>
+
+<h4 id="code-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Code (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.CODE
+content : string
+</pre></div>
+
+<h4 id="underline-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Underline (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.UNDERLINE
+content : inline-text-item[]
+</pre></div>
+
+<h4 id="bold-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Bold (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.BOLD
+content : inline-text-item[]
+</pre></div>
+
+<h4 id="italic-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Italic (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.ITALIC
+content : inline-text-item[]
+</pre></div>
+
+<h4 id="strikethrough-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Strikethrough (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.STRIKETHROUGH
+content : inline-text-item[]
+</pre></div>
+
+<h4 id="image-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Image (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.IMAGE,
+alt_text : string
+source : string
+</pre></div>
+
+<h4 id="link-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Link (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.LINK
+content : inline-text-item[]
+url : string
+</pre></div>
+
+<h4 id="relative-link-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Relative link (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.RELATIVE_LINK
+content : inline-text-item[]
+url : string
+</pre></div>
+
+<h4 id="reference-inline" class="md-header md-header4 md-block">
+	<span class="md-text">Reference (inline)</span>
+</h4>
+
+<div class="md-block-code md-block"><pre>
+type = markup.REFERENCE
+content : inline-text-item[]
+reference : string
+</pre></div>
+
+<h2 id="configurability" class="md-header md-header2 md-block">
+	<span class="md-text">Configurability</span>
+</h2>
+
+<h3 id="class_prefix" class="md-header md-header3 md-block">
+	<code class="md-code">CLASS_PREFIX</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the class prefix to prepend to all css classes when outputting html.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+html.CLASS_PREFIX = &quot;md-&quot;
+</pre></div>
+
+<h3 id="header_sym" class="md-header md-header3 md-block">
+	<code class="md-code">HEADER_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the header-block symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.HEADER_SYM = &quot;#&quot;
+</pre></div>
+
+<h3 id="list_sym" class="md-header md-header3 md-block">
+	<code class="md-code">LIST_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the list-item symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.LIST_SYM = &quot;*&quot;
+</pre></div>
+
+<h3 id="list_sym2" class="md-header md-header3 md-block">
+	<code class="md-code">LIST_SYM2</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the secondary list-item symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.LIST_SYM2 = &quot;-&quot;
+</pre></div>
+
+<h3 id="rule_sym" class="md-header md-header3 md-block">
+	<code class="md-code">RULE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the horizontal rule symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.RULE_SYM = &quot;---&quot;
+</pre></div>
+
+<h3 id="block_code_sym" class="md-header md-header3 md-block">
+	<code class="md-code">BLOCK_CODE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the block code symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.BLOCK_CODE_SYM = &quot;```&quot;
+</pre></div>
+
+<h3 id="block_quote_sym" class="md-header md-header3 md-block">
+	<code class="md-code">BLOCK_QUOTE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the block quote symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.BLOCK_QUOTE_SYM = &quot;&gt;&quot;
+</pre></div>
+
+<h3 id="resource_sym" class="md-header md-header3 md-block">
+	<code class="md-code">RESOURCE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the resource symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.RESOURCE_SYM = &quot;:&quot;
+</pre></div>
+
+<h3 id="underline_sym" class="md-header md-header3 md-block">
+	<code class="md-code">UNDERLINE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the underline open&frasl;close symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.UNDERLINE_SYM = &quot;__&quot;
+</pre></div>
+
+<h3 id="bold_sym" class="md-header md-header3 md-block">
+	<code class="md-code">BOLD_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the bold open&frasl;close symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.BOLD_SYM = &quot;*&quot;
+</pre></div>
+
+<h3 id="italic_sym" class="md-header md-header3 md-block">
+	<code class="md-code">ITALIC_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the italic open&frasl;close symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.ITALIC_SYM = &quot;_&quot;
+</pre></div>
+
+<h3 id="strikethrough_sym" class="md-header md-header3 md-block">
+	<code class="md-code">STRIKETHROUGH_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the strikethrough open&frasl;close symbol.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.STRIKETHROUGH_SYM = &quot;~~&quot;
+</pre></div>
+
+<h3 id="variable_sym" class="md-header md-header3 md-block">
+	<code class="md-code">VARIABLE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the variable symbol. Note that the syntax supports </span><strong class="md-strikethrough"><i class="md-strikethrough"><span class="md-text">both</span></i></strong><span class="md-text"> </span><code class="md-code">$var</code><span class="md-text"> and </span><code class="md-code">$(var)</code><span class="md-text">.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.VARIABLE_SYM = &quot;$&quot;
+</pre></div>
+
+<h3 id="code_sym" class="md-header md-header3 md-block">
+	<code class="md-code">CODE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the code open&frasl;close symbol. Note that </span><code class="md-code">n</code><span class="md-text"> repetitions of this can be used to open&frasl;close code sections. E.g. </span><code class="md-code"> `` `escaped` `` </code><span class="md-text">.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.CODE_SYM = &quot;`&quot;
+</pre></div>
+
+<h3 id="reference_sym" class="md-header md-header3 md-block">
+	<code class="md-code">REFERENCE_SYM</code>
+</h3>
+
+<p class="md-para md-block">
+<span class="md-text">Defines the reference symbol. Note that the syntax supports </span><strong class="md-strikethrough"><i class="md-strikethrough"><span class="md-text">both</span></i></strong><span class="md-text"> </span><code class="md-code">@ref</code><span class="md-text"> and </span><code class="md-code">@(ref)</code><span class="md-text">.</span>
+</p>
+
+<div class="md-block-code md-block"><pre>
+parse.REFERENCE_SYM = &quot;@&quot;
+</pre></div>
+</div>

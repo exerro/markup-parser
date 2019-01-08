@@ -8,7 +8,7 @@ parse.HEADER_SYM = "#"
 parse.LIST_SYM = "*"
 parse.LIST_SYM2 = "-"
 parse.RULE_SYM = "---"
-parse.CODE_SYM = "```"
+parse.BLOCK_CODE_SYM = "```"
 parse.BLOCK_QUOTE_SYM = ">"
 parse.RESOURCE_SYM = ":"
 
@@ -28,9 +28,9 @@ local findMatch
 local insert, last, map, flatMap, indexOf
 local remove = table.remove
 local get
-local quote
+local quote, patternEscape
 
-function parse.parse(content)
+function markup.parse(content)
 	local lines = formatCodeLines(toLines(content))
 	local blocks
 
@@ -44,9 +44,9 @@ function parse.parse(content)
 			result.sym = parse.RULE_SYM
 			result.content = ""
 
-		elseif r:sub(1, #parse.CODE_SYM) == parse.CODE_SYM then
-			result.sym = parse.CODE_SYM
-			result.content = r:sub(#parse.CODE_SYM + 1)
+		elseif r:sub(1, #parse.BLOCK_CODE_SYM) == parse.BLOCK_CODE_SYM then
+			result.sym = parse.BLOCK_CODE_SYM
+			result.content = r:sub(#parse.BLOCK_CODE_SYM + 1)
 
 		elseif sym == parse.HEADER_SYM or sym == parse.LIST_SYM or sym == parse.LIST_SYM2 or sym == parse.BLOCK_QUOTE_SYM or sym == parse.RESOURCE_SYM then
 			result.sym = r:match(sym == parse.HEADER_SYM and "^#+" or "^[^%w%s]")
@@ -140,11 +140,11 @@ function makeBlocksFromDifferentSyms(lines)
 	local lastLineSym = lines[1].sym
 
 	for i = 2, #lines do
-		if lastLineSym ~= lines[i].sym            -- different block types can't be in the same block
-		or lastLineSym:find(parse.HEADER_SYM)     -- multiple headers can't be in the same block
-		or lastLineSym:find(parse.CODE_SYM)       -- multiple code blocks can't be in the same block
-		or lastLineSym:find(parse.RULE_SYM)       -- multiple horizontal rules can't be in the same block
-		or lastLineSym == parse.RESOURCE_SYM then -- multiple resources can't be in the same block
+		if lastLineSym ~= lines[i].sym                           -- different block types can't be in the same block
+		or lastLineSym:find(patternEscape(parse.HEADER_SYM))      -- multiple headers can't be in the same block
+		or lastLineSym:find(patternEscape(parse.BLOCK_CODE_SYM))  -- multiple code blocks can't be in the same block
+		or lastLineSym:find(patternEscape(parse.RULE_SYM:rep(3))) -- multiple horizontal rules can't be in the same block
+		or lastLineSym == parse.RESOURCE_SYM then                -- multiple resources can't be in the same block
 			insert(blocks, {})
 		end
 
@@ -164,7 +164,7 @@ function formatBlock(lines)
 			content = parseTextInline(table.concat(map(get("content"), lines), "\n"))
 		}
 
-	elseif blockSym:find(parse.HEADER_SYM) then
+	elseif blockSym:find(patternEscape(parse.HEADER_SYM)) then
 		return {
 			type = markup.HEADER,
 			size = math.max(1, math.min(6, #blockSym)),
@@ -182,7 +182,7 @@ function formatBlock(lines)
 			end, lines)
 		}
 
-	elseif blockSym == parse.CODE_SYM then
+	elseif blockSym == parse.BLOCK_CODE_SYM then
 		return {
 			type = markup.BLOCK_CODE,
 			language = lines[1].content:match("([^\n]+)\n"),
@@ -192,7 +192,7 @@ function formatBlock(lines)
 	elseif blockSym == parse.BLOCK_QUOTE_SYM then
 		return {
 			type = markup.BLOCK_QUOTE,
-			content = parse.parse(table.concat(map(get("content"), lines), "\n"))
+			content = markup.parse(table.concat(map(get("content"), lines), "\n"))
 		}
 
 	elseif blockSym == parse.RESOURCE_SYM then
@@ -234,10 +234,10 @@ function parseTextInline(text)
 		local s, f = findMatch(text, i, {
 			"!?%b[]%b()",
 			"%[%[[^%]]+%]%]",
-			parse.REFERENCE_SYM .. "[%w%-]+",
-			parse.REFERENCE_SYM .. "%b()",
-			parse.VARIABLE_SYM .. "[%w%-]+",
-			parse.VARIABLE_SYM .. "%b()",
+			patternEscape(parse.REFERENCE_SYM) .. "[%w%-]+",
+			patternEscape(parse.REFERENCE_SYM) .. "%b()",
+			patternEscape(parse.VARIABLE_SYM) .. "[%w%-]+",
+			patternEscape(parse.VARIABLE_SYM) .. "%b()",
 			{"`+", function(s) return s end}
 		})
 
@@ -364,7 +364,7 @@ function applyItemInline(inline)
 
 			elseif text:sub(i, i) == parse.CODE_SYM then
 				local len = #text:match("^" .. parse.CODE_SYM .. "+", i)
-				local pos = text:find(parse.CODE_SYM:rep(len), i + len)
+				local pos = text:find(patternEscape(parse.CODE_SYM:rep(len)), i + len)
 
 				if pos then
 					insert(items, { type = markup.CODE, content = text:sub(i + len, pos - 1) })
@@ -454,8 +454,8 @@ function findMatch(text, pos, patterns)
 
 		if s then
 			if type(patterns[i]) == "table" then
-				if text:find("^" .. patterns[i][2](text:sub(s, f)), f + 1) then
-					return s, select(2, text:find("^" .. patterns[i][2](text:sub(s, f)), f + 1))
+				if text:find(patterns[i][2](text:sub(s, f)), f + 1) then
+					return s, select(2, text:find(patterns[i][2](text:sub(s, f)), f + 1))
 				end
 			else
 				return s, f
@@ -517,6 +517,10 @@ end
 
 function quote(s)
 	return ("%q"):format(s)
+end
+
+function patternEscape(pat)
+	return pat:gsub("[%-%+%*%?%.%(%)%[%]]", "%%%1")
 end
 
 return parse
