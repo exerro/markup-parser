@@ -137,7 +137,7 @@ string html.render(AST document, string[]? styles)
 string html.render(string document, string[]? styles)
 ```
 
-Renders the document to a HTML document. For any style in `styles`, that style is `@import`-ed automatically. For example, the following example would insert `@import url("css/style.css");` into the top of the rendered document.
+Renders the document to a HTML document. For any style in $`styles`, that style is `@import`-ed automatically. For example, the following example would insert `@import url("css/style.css");` into the top of the rendered document.
 
 ```
 html.render(document, {"css/style.css"})
@@ -149,7 +149,7 @@ html.render(document, {"css/style.css"})
 string html.escape(string text)
 ```
 
-Returns the html-escaped version of `text`. For example, `html.escape("<a>")` returns `"&lt;a&gt;"`.
+Returns the html-escaped version of $`text`. For example, `html.escape("<a>")` returns `"&lt;a&gt;"`.
 
 #### html.codeEnclose()
 
@@ -203,7 +203,7 @@ Sets the reference formatter. The formatter is a function that should return the
 string html.defaultRelativeLinkFormatter(string link)
 ```
 
-Is the identity function (returns its input).
+Is the identity function (returns its input, $`link`).
 
 ## AST structure
 
@@ -228,7 +228,7 @@ size : [1, 6]
 content : inline-text-item[]
 ```
 
-The content of a header. `size` ranges between 1 and 6, equal to the size of the header (`h1`, `h3`, `h6` etc).
+The content of a header. $`size` ranges between 1 and 6, equal to the size of the header (`h1`, `h3`, `h6` etc).
 
 #### List block
 
@@ -242,7 +242,7 @@ items : {
 }
 ```
 
-The content of a list. Each numerically indexed item (`1 .. #items`) is a table containing the content of that item, and its indentation (`level`).
+The content of a list. Each numerically indexed item (`1 .. #items`) is a table containing the content of that item, and its indentation ($`level`).
 
 #### Code block
 
@@ -261,7 +261,7 @@ type = markup.BLOCK_QUOTE
 content : block[]
 ```
 
-The content of a block quote. `content` is a list of blocks.
+The content of a block quote. $`content` is a list of blocks.
 
 #### Resource block
 
@@ -270,7 +270,7 @@ type = markup.RESOURCE
 resource : string
 ```
 
-`resource` is the string representing the resource to load. See [resources](#resources).
+$`resource` is the string representing the resource to load. See [resources](#resources).
 
 #### Horizontal rule
 
@@ -489,7 +489,7 @@ parse.STRIKETHROUGH_SYM = "~~"
 
 ### `VARIABLE_SYM`
 
-Defines the variable symbol. Note that the syntax supports *_both_* `$var` and `$(var)`.
+Defines the variable symbol. Note that the syntax supports `` $`var` ``.
 
 ```
 parse.VARIABLE_SYM = "$"

@@ -169,17 +169,17 @@ function inlineToHTML(inline)
 		return "<code class=\"" .. getClass(html.CODE) .. "\">" .. html.escape(inline.content) .. "</code>"
 
 	elseif inline.type == markup.UNDERLINE then
-		return "<u class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
+		return "<u class=\"" .. getClass(html.UNDERLINE) .. "\">"
 		.. inlinesToHTML(inline.content)
 		.. "</u>"
 
 	elseif inline.type == markup.BOLD then
-		return "<strong class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
+		return "<strong class=\"" .. getClass(html.BOLD) .. "\">"
 		.. inlinesToHTML(inline.content)
 		.. "</strong>"
 
 	elseif inline.type == markup.ITALIC then
-		return "<i class=\"" .. getClass(html.STRIKETHROUGH) .. "\">"
+		return "<i class=\"" .. getClass(html.ITALIC) .. "\">"
 		.. inlinesToHTML(inline.content)
 		.. "</i>"
 

@@ -315,7 +315,7 @@ string html.render(string document, string[]? styles)
 </pre></div>
 
 <p class="md-para md-block">
-<span class="md-text">Renders the document to a HTML document. For any style in </span><code class="md-code">styles</code><span class="md-text">, that style is </span><code class="md-code">@import</code><span class="md-text">-ed automatically. For example, the following example would insert </span><code class="md-code">@import url(&quot;css&frasl;style.css&quot;);</code><span class="md-text"> into the top of the rendered document.</span>
+<span class="md-text">Renders the document to a HTML document. For any style in </span><span class="md-variable">styles</span><span class="md-text">, that style is </span><code class="md-code">@import</code><span class="md-text">-ed automatically. For example, the following example would insert </span><code class="md-code">@import url(&quot;css&frasl;style.css&quot;);</code><span class="md-text"> into the top of the rendered document.</span>
 </p>
 
 <div class="md-block-code md-block"><pre>
@@ -331,7 +331,7 @@ string html.escape(string text)
 </pre></div>
 
 <p class="md-para md-block">
-<span class="md-text">Returns the html-escaped version of </span><code class="md-code">text</code><span class="md-text">. For example, </span><code class="md-code">html.escape(&quot;&lt;a&gt;&quot;)</code><span class="md-text"> returns </span><code class="md-code">&quot;&amp;lt;a&amp;gt;&quot;</code><span class="md-text">.</span>
+<span class="md-text">Returns the html-escaped version of </span><span class="md-variable">text</span><span class="md-text">. For example, </span><code class="md-code">html.escape(&quot;&lt;a&gt;&quot;)</code><span class="md-text"> returns </span><code class="md-code">&quot;&amp;lt;a&amp;gt;&quot;</code><span class="md-text">.</span>
 </p>
 
 <h4 id="html-codeenclose" class="md-header md-header4 md-block">
@@ -421,7 +421,7 @@ string html.defaultRelativeLinkFormatter(string link)
 </pre></div>
 
 <p class="md-para md-block">
-<span class="md-text">Is the identity function (returns its input).</span>
+<span class="md-text">Is the identity function (returns its input, </span><span class="md-variable">link</span><span class="md-text">).</span>
 </p>
 
 <h2 id="ast-structure" class="md-header md-header2 md-block">
@@ -460,7 +460,7 @@ content : inline-text-item[]
 </pre></div>
 
 <p class="md-para md-block">
-<span class="md-text">The content of a header. </span><code class="md-code">size</code><span class="md-text"> ranges between 1 and 6, equal to the size of the header (</span><code class="md-code">h1</code><span class="md-text">, </span><code class="md-code">h3</code><span class="md-text">, </span><code class="md-code">h6</code><span class="md-text"> etc).</span>
+<span class="md-text">The content of a header. </span><span class="md-variable">size</span><span class="md-text"> ranges between 1 and 6, equal to the size of the header (</span><code class="md-code">h1</code><span class="md-text">, </span><code class="md-code">h3</code><span class="md-text">, </span><code class="md-code">h6</code><span class="md-text"> etc).</span>
 </p>
 
 <h4 id="list-block" class="md-header md-header4 md-block">
@@ -478,7 +478,7 @@ items : {
 </pre></div>
 
 <p class="md-para md-block">
-<span class="md-text">The content of a list. Each numerically indexed item (</span><code class="md-code">1 .. #items</code><span class="md-text">) is a table containing the content of that item, and its indentation (</span><code class="md-code">level</code><span class="md-text">).</span>
+<span class="md-text">The content of a list. Each numerically indexed item (</span><code class="md-code">1 .. #items</code><span class="md-text">) is a table containing the content of that item, and its indentation (</span><span class="md-variable">level</span><span class="md-text">).</span>
 </p>
 
 <h4 id="code-block" class="md-header md-header4 md-block">
@@ -505,7 +505,7 @@ content : block[]
 </pre></div>
 
 <p class="md-para md-block">
-<span class="md-text">The content of a block quote. </span><code class="md-code">content</code><span class="md-text"> is a list of blocks.</span>
+<span class="md-text">The content of a block quote. </span><span class="md-variable">content</span><span class="md-text"> is a list of blocks.</span>
 </p>
 
 <h4 id="resource-block" class="md-header md-header4 md-block">
@@ -518,7 +518,7 @@ resource : string
 </pre></div>
 
 <p class="md-para md-block">
-<code class="md-code">resource</code><span class="md-text"> is the string representing the resource to load. See </span><a class="md-link" href="#resources"><span class="md-text">resources</span></a><span class="md-text">.</span>
+<span class="md-variable">resource</span><span class="md-text"> is the string representing the resource to load. See </span><a class="md-link" href="#resources"><span class="md-text">resources</span></a><span class="md-text">.</span>
 </p>
 
 <h4 id="horizontal-rule" class="md-header md-header4 md-block">
@@ -835,7 +835,7 @@ parse.STRIKETHROUGH_SYM = &quot;~~&quot;
 </h3>
 
 <p class="md-para md-block">
-<span class="md-text">Defines the variable symbol. Note that the syntax supports </span><strong class="md-strikethrough"><i class="md-strikethrough"><span class="md-text">both</span></i></strong><span class="md-text"> </span><code class="md-code">$var</code><span class="md-text"> and </span><code class="md-code">$(var)</code><span class="md-text">.</span>
+<span class="md-text">Defines the variable symbol. Note that the syntax supports </span><code class="md-code"> $`var` </code><span class="md-text">.</span>
 </p>
 
 <div class="md-block-code md-block"><pre>
@@ -859,7 +859,7 @@ parse.CODE_SYM = &quot;`&quot;
 </h3>
 
 <p class="md-para md-block">
-<span class="md-text">Defines the reference symbol. Note that the syntax supports </span><strong class="md-strikethrough"><i class="md-strikethrough"><span class="md-text">both</span></i></strong><span class="md-text"> </span><code class="md-code">@ref</code><span class="md-text"> and </span><code class="md-code">@(ref)</code><span class="md-text">.</span>
+<span class="md-text">Defines the reference symbol. Note that the syntax supports </span><strong class="md-bold"><i class="md-italic"><span class="md-text">both</span></i></strong><span class="md-text"> </span><code class="md-code">@ref</code><span class="md-text"> and </span><code class="md-code">@(ref)</code><span class="md-text">.</span>
 </p>
 
 <div class="md-block-code md-block"><pre>

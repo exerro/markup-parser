@@ -355,15 +355,14 @@ function applyItemInline(inline)
 		end
 
 		while i <= #text do
-			if text:sub(i, i + #parse.VARIABLE_SYM - 1) == parse.VARIABLE_SYM then
-				local bracket = text:sub(i + #parse.VARIABLE_SYM) == "("
-				local s = text:match(bracket and "^%b()" or "^[%w%-]+", i + #parse.VARIABLE_SYM)
+			if text:sub(i, i + #parse.VARIABLE_SYM) == parse.VARIABLE_SYM .. "`" then
+				local var = text:match("^`[%w_%.:%-]+`", i + #parse.VARIABLE_SYM)
 
-				if s then
-					i = i + #s + #parse.VARIABLE_SYM
-					insert(items, { type = markup.VARIABLE, variable = bracket and s:sub(2, -2) or s })
+				if var then
+					i = i + #var + #parse.VARIABLE_SYM
+					insert(items, { type = markup.VARIABLE, variable = var:sub(2, -2) })
 				else
-					append(parse.VARIABLE_SYM:sub(1, 1))
+					append(text:sub(i, i))
 				end
 
 			elseif text:sub(i, i) == parse.CODE_SYM then
@@ -374,7 +373,7 @@ function applyItemInline(inline)
 					insert(items, { type = markup.CODE, content = text:sub(i + len, pos - 1) })
 					i = pos + len
 				else
-					append(parse.CODE_SYM)
+					append(text:sub(i, i))
 				end
 
 			elseif text:sub(i, i + 1) == "![" then
