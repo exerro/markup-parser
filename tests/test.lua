@@ -1,6 +1,5 @@
 
 local parse = require "src.parse"
-local debug = require "src.debug"
 local markup = require "src.markup"
 local html = require "src.html"
 
@@ -12,5 +11,7 @@ h:close()
 parsed = markup.parse(content)
 
 local h = io.open("out.html", "w")
-h:write(html.render(parsed, {"src/style.css", "global-style.css"}))
+h:write("<style> @import 'src/style.css'; </style>")
+h:write("<style> @import 'global-style.css'; </style>")
+h:write(html.render(parsed))
 h:close()

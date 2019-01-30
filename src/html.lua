@@ -44,19 +44,14 @@ local blocksToHTML, blockToHTML, inlinesToHTML, inlineToHTML
 local listElements, listItemToHTML
 local map, indent, urlEscape, urlEscapeTable
 
-function html.render(blocks, styles)
+function html.render(blocks)
 	if type(blocks) == "string" then
 		blocks = markup.parse(blocks)
 	end
 
-	return "<style>\n"
-	.. indent(table.concat(map(function(s)
-		return "@import url(" .. ("%q"):format(s) .. ");"
-	end, styles or {}), "\n"))
-	.. "\n</style>"
-	.. "\n<div class=\"" .. getClass(html.CONTENT) .. "\">\n"
-	.. blocksToHTML(blocks)
-	.. "\n</div>"
+	return "\n<div class=\"" .. getClass(html.CONTENT) .. "\">\n"
+	    .. blocksToHTML(blocks)
+	    .. "\n</div>"
 end
 
 function html.escape(text)
