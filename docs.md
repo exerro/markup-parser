@@ -137,14 +137,14 @@ local html = require("src.html")
 #### html.render()
 
 ```
-string html.render(AST document, string[]? styles)
-string html.render(string document, string[]? styles)
+string html.render(AST document)
+string html.render(string document)
 ```
 
-Renders the document to a HTML document. For any style in $`styles`, that style is `@import`-ed automatically. For example, the following example would insert `@import url("css/style.css");` into the top of the rendered document.
+Renders the document to a HTML document.
 
 ```
-html.render(document, {"css/style.css"})
+html.render(document)
 ```
 
 #### html.escape()
