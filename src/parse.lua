@@ -70,6 +70,10 @@ function markup.parse(content)
 	return map(formatBlock, blocks)
 end
 
+function markup.parseInline(inline)
+	return parseTextInline(inline)
+end
+
 function toLines(text)
 	local lines = {}
 	local p = 1
@@ -486,8 +490,10 @@ function removeComments(text)
 
 	local function strip(text)
 		return (text:gsub(patternEscape(parse.MULTILINE_COMMENT_OPEN) .. ".-" .. patternEscape(parse.MULTILINE_COMMENT_CLOSE), "")
-		            :gsub(patternEscape(parse.LINE_COMMENT) .. ".-\n", "\n")
-		            :gsub(patternEscape(parse.LINE_COMMENT) .. ".-$", ""))
+		            :gsub(" " .. patternEscape(parse.LINE_COMMENT) .. ".-\n", "\n")
+		            :gsub(" " .. patternEscape(parse.LINE_COMMENT) .. ".-$", "")
+		            :gsub("\n" .. patternEscape(parse.LINE_COMMENT) .. ".-\n", "\n\n")
+		            :gsub("\n" .. patternEscape(parse.LINE_COMMENT) .. ".-$", "\n"))
 	end
 
 	while s do

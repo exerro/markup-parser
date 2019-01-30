@@ -88,6 +88,8 @@ The language supports single-line and multi-line comments, using the following s
 comment -/
 ```
 
+Note that single-line comments must be preceeded by a new line or a space.
+
 ### Variables
 
 Variables are intended to act similar to `` `code` `` inlines, but specifically for referring to variables.

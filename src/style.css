@@ -11,10 +11,6 @@
 	line-height: 1.5;
 }
 
-.md-content * {
-	vertical-align: middle;
-}
-
 .md-content > :first-child {
 	margin-top: 0 !important;
 }
