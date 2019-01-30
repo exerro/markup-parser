@@ -140,4 +140,29 @@ markup.BLOCK_QUOTE = "block-quote"
 markup.RESOURCE = "resource"
 markup.HORIZONTAL_RULE = "horizontal-rule"
 
+function markup.isInline(item)
+	return item.type == markup.TEXT
+	    or item.type == markup.VARIABLE
+	    or item.type == markup.CODE
+	    or item.type == markup.MATH
+	    or item.type == markup.UNDERLINE
+	    or item.type == markup.BOLD
+	    or item.type == markup.ITALIC
+	    or item.type == markup.STRIKETHROUGH
+	    or item.type == markup.IMAGE
+	    or item.type == markup.LINK
+	    or item.type == markup.RELATIVE_LINK
+	    or item.type == markup.REFERENCE
+end
+
+function markup.isBlock(item)
+	return item.type == markup.PARAGRAPH
+	    or item.type == markup.HEADER
+	    or item.type == markup.LIST
+	    or item.type == markup.BLOCK_CODE
+	    or item.type == markup.BLOCK_QUOTE
+	    or item.type == markup.RESOURCE
+	    or item.type == markup.HORIZONTAL_RULE
+end
+
 return markup

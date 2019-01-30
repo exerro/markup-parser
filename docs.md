@@ -17,6 +17,16 @@
 * [Using the library](#using-the-library)
 	* [Library functions](#library-functions)
 		* [`markup.parse`](#markup-parse)
+		* [`format.blockToString`](#format-blockToString)
+		* [`format.blocksToString`](#format-blocksToString)
+		* [`format.inlineToString`](#format-inlineToString)
+		* [`format.inlinesToString`](#format-inlinesToString)
+		* [`scan.updateDocument`](#scan-updateDocument)
+		* [`scan.updateBlocks`](#scan-updateBlocks)
+		* [`scan.updateInlines`](#scan-updateInlines)
+		* [`scan.scanDocument`](#scan-scanDocument)
+		* [`scan.scanBlocks`](#scan-scanBlocks)
+		* [`scan.scanInlines`](#scan-scanInlines)
 * [HTML output](#html-output)
 	* [`html.render()`](#html-render)
 	* [`html.escape()`](#html-escape)
@@ -116,6 +126,18 @@ To load parsing capabilities, use...
 local parse = require("src.parse")
 ```
 
+### Scan options
+
+The `scan` library includes many functions, each taking an optional `options` table. This table contains the following fields:
+
+```
+{
+	(AST -> boolean) filter    - returns true if the node should be considered (updated and included)
+	boolean include_unfiltered - equal to true if, despite not being filtered, a node should be included
+	boolean single_pass        - equal to true if changes should not re-invoke the updater
+}
+```
+
 ### Library functions
 
 #### markup.parse()
@@ -125,6 +147,86 @@ AST markup.parse(string markup_text)
 ```
 
 Parses the markup text and returns its AST (a list of blocks).
+
+#### format.blockToString()
+
+```
+string format.blockToString(AST block)
+```
+
+Converts a block into its string representation.
+
+#### format.blocksToString()
+
+```
+string format.blocksToString(AST[] blocks)
+```
+
+Converts a list of blocks into their string representation.
+
+#### format.inlineToString()
+
+```
+string format.inlineToString(AST text)
+```
+
+Converts an inline into its string representation.
+
+#### format.inlinesToString()
+
+```
+string format.inlinesToString(AST[] text)
+```
+
+Converts a list of inlines into their string representation.
+
+#### scan.updateDocument()
+
+```
+AST scan.updateDocument(AST document, (AST -> AST[]?) f, options)
+```
+
+Updates the entire document. `f` is called for every node, and should return a list of updated nodes, or `nil` (to apply no changes). See [scan options](#scan-options).
+
+#### scan.updateBlocks()
+
+```
+AST scan.updateBlocks(AST document, (AST -> AST[]?) f, options)
+```
+
+Updates the blocks in the document. `f` is called for every block, and should return a list of updated blocks, or `nil` (to apply no changes). See [scan options](#scan-options).
+
+#### scan.updateInlines()
+
+```
+AST scan.updateInlines(AST document, (AST -> AST[]?) f, options)
+```
+
+Updates the inlines in the document. `f` is called for every inline, and should return a list of updated inlines, or `nil` (to apply no changes). See [scan options](#scan-options).
+
+#### scan.scanDocument()
+
+```
+AST scan.scanDocument(AST document, (AST -> nothing) f, options)
+```
+
+Runs through all the nodes in the document. `f` is called for every node. See [scan options](#scan-options).
+
+#### scan.scanBlocks()
+
+```
+AST scan.scanBlocks(AST document, (AST -> nothing) f, options)
+```
+
+Runs through all the blocks in the document. `f` is called for every block. See [scan options](#scan-options).
+
+#### scan.scanInlines()
+
+```
+AST scan.scanInlines(AST document, (AST -> nothing) f, options)
+```
+
+Runs through all the inlines in the document. `f` is called for every inline. See [scan options](#scan-options).
 
 ## HTML output
 
@@ -345,7 +447,7 @@ content : inline-text-item[]
 #### Image (inline)
 
 ```
-type = markup.IMAGE,
+type = markup.IMAGE
 alt_text : string
 source : string
 ```
