@@ -1,5 +1,6 @@
 
 local markup = require "src.markup"
+local format = require "src.format"
 
 require "src.parse"
 
@@ -107,14 +108,7 @@ function blockToHTML(block)
 
 	elseif block.type == markup.HEADER then
 		local content = inlinesToHTML(block.content)
-		local id = content
-			:gsub("<.->", "")
-			:gsub("^%s+", "")
-			:gsub("%s+$", "")
-			:gsub("(%s)%s+", "%1")
-			:gsub("[^%w%-%:%.%_%s]", "")
-			:gsub("[^%w_]", "-")
-			:lower()
+		local id = format.headerID(block)
 
 		return "<h" .. block.size .. " id=\"" .. html.escape(id) .. "\" class=\"" .. getClass(html.HEADER, html.HEADER .. block.size, html.BLOCK) .. "\">\n"
 		.. indent(content)

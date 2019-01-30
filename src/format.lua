@@ -5,48 +5,6 @@ require "src.parse"
 
 local format = {}
 
-format.filters = {}
-
-function format.filters.type(...)
-	local types = {...}
-
-	if #types == 1 then
-		local type = types[1]
-		
-		return function(t)
-			return t.type == type
-		end
-	end
-
-	return function(t)
-		for i = 1, #types do
-			if t.type == types[i] then
-				return true
-			end
-		end
-
-		return false
-	end
-end
-
-function format.filters.hasChildren()
-	return function(t)
-		return type(t.content) == "table"
-	end
-end
-
-function format.filters.either(a, b)
-	return function(...)
-		return a(...) or b(...)
-	end
-end
-
-function format.filters.both(a, b)
-	return function(...)
-		return a(...) and b(...)
-	end
-end
-
 local containerInlines = {
 	[markup.LINK] = true,
 	[markup.RELATIVE_LINK] = true,
@@ -56,6 +14,56 @@ local containerInlines = {
 	[markup.ITALIC] = true,
 	[markup.STRIKETHROUGH] = true
 }
+
+function format.headerID(header)
+	if header.type ~= markup.HEADER then
+		return nil
+	end
+
+	local content = ""
+	local queue = {}
+
+	local function addt(t)
+		for i = 1, #t do
+			table.insert(queue, i, t[i])
+		end
+	end
+
+	addt(header.content)
+
+	while queue[1] do
+		local text = table.remove(queue, 1)
+
+		if text.type == markup.TEXT then
+			content = content .. text.content
+
+		elseif text.type == markup.VARIABLE then
+			content = content .. "$" .. text.variable
+
+		elseif text.type == markup.CODE then
+			content = content .. text.content
+
+		elseif text.type == markup.UNDERLINE
+			or text.type == markup.BOLD
+			or text.type == markup.ITALIC
+			or text.type == markup.STRIKETHROUGH
+			or text.type == markup.LINK
+			or text.type == markup.RELATIVE_LINK
+			or text.type == markup.REFERENCE
+		then
+			addt(text.content)
+		end
+	end
+
+	return content
+			:gsub("<.->", "")
+			:gsub("^%s+", "")
+			:gsub("%s+$", "")
+			:gsub("(%s)%s+", "%1")
+			:gsub("[^%w%-%:%.%_%s]", "")
+			:gsub("[^%w_]", "-")
+			:lower()
+end
 
 function format.blockToString(block)
 	if block.type == markup.PARAGRAPH then
