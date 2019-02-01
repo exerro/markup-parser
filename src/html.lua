@@ -192,21 +192,21 @@ function inlineToHTML(inline)
 		.. "</del>"
 
 	elseif inline.type == markup.IMAGE then
-		return "<img class=\"" .. getClass(html.IMAGE) .. "\" alt=\"" .. html.escape(inline.alt_text) .. "\" src=\"" .. html.escape(inline.source) .. "\">"
+		return "<img class=\"" .. getClass(html.IMAGE) .. "\" alt=\"" .. html.escape(inline.alt_text) .. "\" src=\"" .. (inline.source) .. "\">"
 
 	elseif inline.type == markup.LINK then
-		return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. html.escape(inline.url) .. "\">" .. inlinesToHTML(inline.content) .. "</a>"
+		return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. (inline.url) .. "\">" .. inlinesToHTML(inline.content) .. "</a>"
 
 	elseif inline.type == markup.RELATIVE_LINK then
 		if relativeLinkFormatter then
-			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. html.escape(relativeLinkFormatter(inline.url)) .. "\">" .. inlinesToHTML(inline.content) .. "</a>"
+			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. (relativeLinkFormatter(inline.url)) .. "\">" .. inlinesToHTML(inline.content) .. "</a>"
 		else
 			return "<span class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no relative link formatter for '" .. inline.url .. "' :( &gt;</span>"
 		end
 
 	elseif inline.type == markup.REFERENCE then
 		if referenceFormatter then
-			return "<a class=\"" .. getClass(html.REFERENCE) .. "\" href=\"" .. html.escape(referenceFormatter(inline.reference)) .. "\">" .. inline.content .. "</a>"
+			return "<a class=\"" .. getClass(html.REFERENCE) .. "\" href=\"" .. (referenceFormatter(inline.reference)) .. "\">" .. inline.content .. "</a>"
 		else
 			return "<span class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no reference formatter for '" .. inline.reference .. "' :( &gt;</span>"
 		end
