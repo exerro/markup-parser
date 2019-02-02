@@ -114,7 +114,7 @@ function formatCodeLines(lines)
 				inCode = true
 			end
 
-			insert(result, lines[i])
+			insert(result, (lines[i]:gsub("%s+$", ""))
 		end
 	end
 
