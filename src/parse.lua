@@ -85,12 +85,12 @@ end
 function toLines(text)
 	local lines = {}
 	local p = 1
-	local s, f = text:find("\n")
+	local s, f = text:find("\r?\n")
 
 	while s do
 		insert(lines, text:sub(p, s - 1))
 		p = f + 1
-		s, f = text:find("\n", p)
+		s, f = text:find("\r?\n", p)
 	end
 
 	insert(lines, text:sub(p))
