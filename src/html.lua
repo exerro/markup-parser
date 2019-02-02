@@ -58,7 +58,7 @@ end
 function html.escape(text)
 	return text:gsub("[&/<>\"]", {
 		["&"] = "&amp;",
-		["/"] = "&frasl;",
+		["/"] = "&#47;",
 		["<"] = "&lt;",
 		[">"] = "&gt;",
 		["\""] = "&quot;"

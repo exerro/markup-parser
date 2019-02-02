@@ -53,7 +53,11 @@ function markup.parse(content)
 			result.sym = parse.BLOCK_CODE_SYM
 			result.content = r:sub(#parse.BLOCK_CODE_SYM + 1)
 
-		elseif sym == parse.HEADER_SYM or sym == parse.LIST_SYM or sym == parse.LIST_SYM2 or sym == parse.BLOCK_QUOTE_SYM or sym == parse.RESOURCE_SYM then
+		elseif r:sub(2, 2):find "%s" and (sym == parse.HEADER_SYM or sym == parse.LIST_SYM or sym == parse.LIST_SYM2 or sym == parse.BLOCK_QUOTE_SYM) then
+			result.sym = r:match(sym == parse.HEADER_SYM and "^#+" or "^[^%w%s]")
+			result.content = r:match(sym == parse.HEADER_SYM and "^#+%s+(.+)" or "^[^%w%s]%s+(.+)")
+
+		elseif sym == parse.RESOURCE_SYM then
 			result.sym = r:match(sym == parse.HEADER_SYM and "^#+" or "^[^%w%s]")
 			result.content = r:match(sym == parse.HEADER_SYM and "^#+%s*(.+)" or "^[^%w%s]%s*(.+)")
 
