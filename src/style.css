@@ -11,16 +11,17 @@
 	line-height: 1.5;
 }
 
-.mu-content > :first-child {
+.mu-block:first-child {
 	margin-top: 0 !important;
 }
 
-.mu-content > :last-child {
+.mu-block:last-child {
 	margin-bottom: 0 !important;
 }
 
 .mu-block {
-	margin: 1em 0;
+	margin-top: 0;
+	margin-bottom: 0.8em;
 }
 
 .mu-para {
@@ -28,6 +29,8 @@
 }
 
 .mu-header {
+	margin-top: 1em;
+	margin-bottom: 0.8em;
 	font-weight: 600;
 	line-height: 1.25;
 	color: #24292e;
@@ -36,7 +39,7 @@
 .mu-header1 {
 	font-size: 2em;
 	padding-bottom: 0.3em;
-	border-bottom: 1px solid #eaecef;
+	border-bottom: 2px solid #eaecef;
 	margin-bottom: 0.5em;
 }
 
@@ -82,11 +85,12 @@
 
 .mu-block-code {
 	font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
-    font-size: 85%;
+    font-size: 95%;
     line-height: 1.45;
 }
 
 .mu-block-code-content {
+	margin: 0;
 	background-color: #f6f8fa;
     border-radius: 3px;
     padding: 16px;
@@ -104,16 +108,10 @@
 	color: #6a737d;
 }
 
-.mu-block-quote > *:first-child {
-	margin-top: 0;
-}
-
-.mu-block-quote > *:last-child {
-	margin-bottom: 0;
-}
-
 .mu-hr {
-	color: #eaecef;
+	background-color: #eaecef;
+	height: 1px;
+	border: none;
 }
 
 .mu-text {

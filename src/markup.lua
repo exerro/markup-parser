@@ -588,7 +588,7 @@ end
 
 -- parses a string into a list of blocks
 function markup.parse(content)
-	local lines = formatLines(groupCodeLines(removeCommentLines(splitContentIntoLines(content))))
+	local lines = formatLines(removeCommentLines(groupCodeLines(splitContentIntoLines(content))))
 	local blocks = flatMap(makeBlocksFromDifferentSyms, makeBlocksFromEmptyLines(lines))
 
 	return map(createBlock, blocks)
@@ -615,7 +615,7 @@ function markup.parse_text(text)
 		local idx = indexOf(sym, modifiers)
 
 		if idx then
-			for i = idx, #value_stack do
+			for i = idx, #value_stack - 1 do
 				pop()
 			end
 		else
@@ -751,6 +751,30 @@ function splitContentIntoLines(text)
 	return lines
 end
 
+-- groups lines between multi-line code tags into a single line
+function groupCodeLines(lines)
+	local result = {}
+	local inCode = false
+
+	for i = 1, #lines do
+		if inCode then
+			if lines[i]:find("^%s*" .. ("`"):rep(inCode) .. "%s*$") then
+				inCode = false
+			else
+				insert(result, remove(result) .. "\n" .. lines[i])
+			end
+		else
+			if lines[i]:find "^%s*```+[%w_%-]*%s*$" then
+				inCode = #lines[i]:match "^%s*(```+)[%w_%-]*%s*$"
+			end
+
+			insert(result, (lines[i]:gsub("%s+$", "")))
+		end
+	end
+
+	return result
+end
+
 -- removes lines containing only a comment
 function removeCommentLines(lines)
 	local result = {}
@@ -760,30 +784,6 @@ function removeCommentLines(lines)
 			result[i] = ""
 		else
 			result[i] = lines[i]
-		end
-	end
-
-	return result
-end
-
--- groups lines between multi-line code tags into a single line
-function groupCodeLines(lines)
-	local result = {}
-	local inCode = false
-
-	for i = 1, #lines do
-		if inCode then
-			if lines[i]:find "^%s*```%s*$" then
-				inCode = false
-			else
-				insert(result, remove(result) .. "\n" .. lines[i])
-			end
-		else
-			if lines[i]:find "^%s*```[%w_%-]*%s*$" then
-				inCode = true
-			end
-
-			insert(result, (lines[i]:gsub("%s+$", "")))
 		end
 	end
 
@@ -818,7 +818,7 @@ function formatLines(lines)
 
 		elseif r:sub(1, #BLOCK_QUOTE_SYM + 1) == BLOCK_QUOTE_SYM .. " " then
 			result.sym = BLOCK_QUOTE_SYM
-			result.content = r:sub(#BLOCK_QUOTE_SYM + 1):gsub("^%s+", "")
+			result.content = r:sub(#BLOCK_QUOTE_SYM + 2)
 
 		elseif r:find("^" .. patternEscape(HEADER_SYM) .. "+%s") then
 			result.sym = HEADER_SYM
@@ -1138,14 +1138,21 @@ function inlineToHTML(inline, options)
 		.. inlinesToHTML(inline.content, options)
 		.. "</a>"
 	elseif inline.type == markup.REFERENCE then
-		local link = options.reference_link and options.reference_link(inline.reference)
+		local link
+		
+		if type(options.reference_link) == "function" then
+			link = options.reference_link(inline.reference)
+		elseif type(options.reference_link) == "table" then
+			link = options.reference_link[inline.reference]
+		end
+
 		if link then
 			return "<a class=\"" .. markup.html.class(HTML_REFERENCE) .. "\" "
 			.. "href=\"" .. tostring(link) .. "\">"
 			.. inlinesToHTML(inline.content, options)
 			.. "</a>"
 		else
-			return formatError("no reference link for '" .. inline.reference .. "' :(")
+			return formatError("no reference link for '" .. inline.reference .. "'")
 		end
 	else
 		return error("internal markup error: unknown inline type (" .. tostring(inline.type) .. ")")
