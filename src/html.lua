@@ -1,17 +1,13 @@
 
 local markup = require "src.markup"
-local format = require "src.format"
-
-require "src.parse"
 
 local html = {}
 local highlighters = {}
 local resourceLoader
-local relativeLinkFormatter
 local referenceFormatter
 
 -- configurable
-html.CLASS_PREFIX = "md-"
+html.CLASS_PREFIX = "mu-"
 
 -- css classes, note that "~" is replaced with `html.CLASS_PREFIX`
 html.FORMAT_ERROR = "~format-error"
@@ -77,16 +73,8 @@ function html.setResourceLoader(loader)
 	resourceLoader = loader
 end
 
-function html.setRelativeLinkFormatter(formatter)
-	relativeLinkFormatter = formatter
-end
-
 function html.setReferenceFormatter(formatter)
 	referenceFormatter = formatter
-end
-
-function html.defaultRelativeLinkFormatter(link)
-	return link
 end
 
 function blocksToHTML(blocks)
@@ -108,7 +96,7 @@ function blockToHTML(block)
 
 	elseif block.type == markup.HEADER then
 		local content = inlinesToHTML(block.content)
-		local id = format.headerID(block)
+		local id = markup.html.headerID(block)
 
 		return "<h" .. block.size .. " id=\"" .. html.escape(id) .. "\" class=\"" .. getClass(html.HEADER, html.HEADER .. block.size, html.BLOCK) .. "\">\n"
 		.. indent(content)
@@ -161,7 +149,7 @@ function inlineToHTML(inline)
 		return "<span class=\"" .. getClass(html.TEXT) .. "\">" .. html.escape(inline.content) .. "</span>"
 
 	elseif inline.type == markup.VARIABLE then
-		return "<span class=\"" .. getClass(html.VARIABLE) .. "\">" .. html.escape(inline.variable) .. "</span>"
+		return "<span class=\"" .. getClass(html.VARIABLE) .. "\">" .. html.escape(inline.content) .. "</span>"
 
 	elseif inline.type == markup.CODE then
 		return "<code class=\"" .. getClass(html.CODE) .. "\">" .. html.escape(inline.content) .. "</code>"
@@ -196,13 +184,6 @@ function inlineToHTML(inline)
 
 	elseif inline.type == markup.LINK then
 		return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. (inline.url) .. "\">" .. inlinesToHTML(inline.content) .. "</a>"
-
-	elseif inline.type == markup.RELATIVE_LINK then
-		if relativeLinkFormatter then
-			return "<a class=\"" .. getClass(html.LINK) .. "\" href=\"" .. (relativeLinkFormatter(inline.url)) .. "\">" .. inlinesToHTML(inline.content) .. "</a>"
-		else
-			return "<span class=\"" .. getClass(html.FORMAT_ERROR) .. "\">&lt; no relative link formatter for '" .. inline.url .. "' :( &gt;</span>"
-		end
 
 	elseif inline.type == markup.REFERENCE then
 		if referenceFormatter then

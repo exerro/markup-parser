@@ -3,7 +3,7 @@ local markup = require "src.markup"
 
 local scan = {}
 
-local update, updateIgnoreUnfiltered, genericScan, updateBlocks, updateBlockChildren, updateInlines, updateInlineChildren
+local update, updateIgnoreUnfiltered, updateBlocks, updateBlockChildren, updateInlines, updateInlineChildren
 
 -- options includes filter, single_pass, include_unfiltered
 
@@ -17,18 +17,6 @@ end
 
 function scan.updateInlines(document, f, options)
 	return updateIgnoreUnfiltered(document, f, options or {}, markup.isInline)
-end
-
-function scan.scanDocument(document, f, options)
-	return genericScan(scan.updateDocument, document, f, options or {})
-end
-
-function scan.scanBlocks(document, f, options)
-	return genericScan(scan.updateBlocks, document, f, options or {})
-end
-
-function scan.scanInlines(document, f, options)
-	return genericScan(scan.updateInlines, document, f, options or {})
 end
 
 function update(t, f, options, upd, updc)
@@ -99,21 +87,6 @@ function updateIgnoreUnfiltered(document, f, options, testFilter)
 	)
 end
 
-function genericScan(func, document, f, options)
-	return func(
-		document,
-		function(...)
-			f(...)
-			return nil
-		end,
-		setmetatable({
-			include_unfiltered = true,
-		}, {
-			__index = options
-		})
-	)
-end
-
 function updateBlocks(blocks, f, options)
 	return update(blocks, f, options, updateBlocks, updateBlockChildren)
 end
@@ -150,7 +123,6 @@ function updateInlineChildren(inline, f, options)
 	or inline.type == markup.ITALIC
 	or inline.type == markup.STRIKETHROUGH
 	or inline.type == markup.LINK
-	or inline.type == markup.RELATIVE_LINK
 	or inline.type == markup.REFERENCE
 	then
 		inline.content, changed = updateInlines(inline.content, f, options)
