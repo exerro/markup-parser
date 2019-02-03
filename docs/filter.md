@@ -38,6 +38,30 @@ filter markup.filter.type(node_type)
 
 Returns a filter matching only nodes with type $`node_type`.
 
+### markup.filter.property_equals
+
+```
+filter markup.filter.property_equals(string property, any value)
+```
+
+Returns a filter matching only nodes where `node[property] == value`
+
+### markup.filter.property_matches
+
+```
+filter markup.filter.property_matches(string property, (any -> boolean) predicate)
+```
+
+Returns a filter matching only nodes where `predicate(node[property])`
+
+### markup.filter.has_data_type
+
+```
+filter markup.filter.has_data_type(string data_type)
+```
+
+Returns a filter matching only nodes of type `markup.DATA` where `node.data_type == data_type`
+
 ### markup.filter.inline
 
 ```

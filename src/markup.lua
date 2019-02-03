@@ -560,6 +560,23 @@ function markup.filter.type(type)
 	end)
 end
 
+function markup.filter.property_equals(property, value)
+	return markup.filter.new(function(item)
+		return item[property] == value
+	end)
+end
+
+function markup.filter.property_matches(property, predicate)
+	return markup.filter.new(function(item)
+		return predicate(item[property])
+	end)
+end
+
+function markup.filter.has_data_type(data_type)
+	return markup.filter.type(markup.DATA)
+	     * markup.filter.property_equals("data_type", data_type)
+end
+
 markup.filter.inline
 = markup.filter.new(markup.is_inline)
 

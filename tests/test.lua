@@ -15,9 +15,10 @@ content = [[
 parsed = markup.parse(content)
 
 markup.scan.text(parsed, function(node)
-	print(tostring(node.data_type), node.data)
+	print(node.data_type, node.data)
 end, {
 	filter = markup.filter.type(markup.DATA)
+	       * markup.filter.property_equals("data_type", "date")
 })
 
 local h = io.open("out.html", "w")

@@ -7,6 +7,10 @@ This submodule is not yet implemented and will handle AST updates/mutation.
 
 ### markup.update.document(document, f, options)
 ### markup.update.text(document, f, options)
+### markup.update.insert_after(document, filter, node, many, deep_update)
+### markup.update.insert_after_text(document, filter, node, many, deep_update)
+### markup.update.insert_before(document, filter, node, many, deep_update)
+### markup.update.insert_before_text(document, filter, node, many, deep_update)
 ### markup.update.remove_first(document, filter, deep_update)
 ### markup.update.remove_first_text(document, filter, deep_update)
 ### markup.update.remove_all(document, filter, deep_update)
