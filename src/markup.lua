@@ -1,4 +1,32 @@
 
+local HTML_MATH_URL = "https://chart.googleapis.com/chart?cht=tx&chl="
+
+-- css classes, note that "~" is replaced with `${markup.html.CLASS_PREFIX}-`
+local HTML_FORMAT_ERROR = "~format-error"
+local HTML_BLOCK = "~block"
+local HTML_CONTENT = "~content"
+
+local HTML_PARAGRAPH = "~para"
+local HTML_HEADER = "~header"
+local HTML_LIST = "~list"
+local HTML_LIST_ITEM = "~list-item"
+local HTML_BLOCK_CODE = "~block-code"
+local HTML_BLOCK_CODE_CONTENT = "~block-code-content"
+local HTML_BLOCK_QUOTE = "~block-quote"
+local HTML_HORIZONTAL_RULE = "~hr"
+
+local HTML_TEXT = "~text"
+local HTML_VARIABLE = "~variable"
+local HTML_CODE = "~code"
+local HTML_MATH = "~math"
+local HTML_UNDERLINE = "~underline"
+local HTML_BOLD = "~bold"
+local HTML_ITALIC = "~italic"
+local HTML_STRIKETHROUGH = "~strikethrough"
+local HTML_IMAGE = "~image"
+local HTML_LINK = "~link"
+local HTML_REFERENCE = "~reference"
+
 -- symbols
 local HEADER_SYM = "#"
 local LIST_SYM = "*"
@@ -31,6 +59,11 @@ local insert, last, map, flatMap, indexOf
 local remove = table.remove
 local get
 local patternEscape
+local indent
+local urlEscapeTable
+local blocksToHTML, blockToHTML, inlinesToHTML, inlineToHTML
+local listElements, listItemToHTML
+local formatError, blockFormatError
 
 local markup = {}
 
@@ -39,6 +72,9 @@ markup.update = {}
 markup.html = {}
 markup.filter = {}
 markup.util = {}
+
+-- HTML class prefix
+markup.html.CLASS_PREFIX = "mu"
 
 -- inline types
 markup.TEXT = "text"
@@ -235,6 +271,11 @@ end
 
 function markup.rule()
 	return { type = markup.HORIZONTAL_RULE }
+end
+
+-- returns true if an item is a node
+function markup.isNode(item)
+	return type(item) == "table" and (markup.isInline(item) or markup.isBlock(item))
 end
 
 -- returns true if an item is an inline
@@ -459,6 +500,26 @@ function markup.scan:findAllText(matching, deep_scan)
 	return results
 end
 
+-- options.highlighters[language]
+-- options.loaders[resource_type]
+-- options.reference_link
+function markup.html.render(document, options)
+	options = options or {}
+	options = {
+		highlighters = options.highlighters or {},
+		loaders = options.loaders or {},
+		reference_link = options.reference_link
+	}
+
+	if type(document) == "string" then
+		document = markup.parse(document)
+	end
+
+	return "\n<div class=\"" .. markup.html.class(HTML_CONTENT) .. "\">\n"
+	    .. blocksToHTML(document, options)
+	    .. "\n</div>"
+end
+
 function markup.html.headerID(headerNode)
 	return table.concat(map(get("content"), markup.scan.findAllText(
 		headerNode.content,
@@ -470,6 +531,10 @@ function markup.html.headerID(headerNode)
 	   :gsub("[^%w%-%:%.%_%s]", "")
 	   :gsub("[^%w_]", "-")
 	   :lower()
+end
+
+function markup.html.class(...)
+	return table.concat(map(function(item) return item:gsub("~", markup.html.CLASS_PREFIX .. "-") end, {...}), " ")
 end
 
 function markup.filter.new(f)
@@ -506,6 +571,20 @@ markup.filter.hasText
 = markup.filter.type(markup.TEXT)
 / markup.filter.type(markup.VARIABLE)
 / markup.filter.type(markup.CODE)
+
+function markup.util.htmlEscape(text)
+	return text:gsub("[&/<>\"]", {
+		["&"] = "&amp;",
+		["/"] = "&#47;",
+		["<"] = "&lt;",
+		[">"] = "&gt;",
+		["\""] = "&quot;"
+	})
+end
+
+function markup.util.urlEscape(text)
+	return text:gsub("[^a-zA-Z0-9_\\]", urlEscapeTable)
+end
 
 -- parses a string into a list of blocks
 function markup.parse(content)
@@ -731,15 +810,15 @@ function formatLines(lines)
 
 		elseif r:sub(1, #LIST_SYM + 1) == LIST_SYM .. " " then
 			result.sym = LIST_SYM
-			result.content = r:match "^[^%w%s]%s+(.+)"
+			result.content = r:sub(#LIST_SYM + 1):gsub("^%s+", "")
 
 		elseif r:sub(1, #LIST_SYM2 + 1) == LIST_SYM2 .. " " then
 			result.sym = LIST_SYM
-			result.content = r:match "^[^%w%s]%s+(.+)"
+			result.content = r:sub(#LIST_SYM2 + 1):gsub("^%s+", "")
 
 		elseif r:sub(1, #BLOCK_QUOTE_SYM + 1) == BLOCK_QUOTE_SYM .. " " then
 			result.sym = BLOCK_QUOTE_SYM
-			result.content = r:match "^[^%w%s]%s+(.+)"
+			result.content = r:sub(#BLOCK_QUOTE_SYM + 1):gsub("^%s+", "")
 
 		elseif r:find("^" .. patternEscape(HEADER_SYM) .. "+%s") then
 			result.sym = HEADER_SYM
@@ -748,7 +827,7 @@ function formatLines(lines)
 
 		elseif r:sub(1, #RESOURCE_SYM) == RESOURCE_SYM then
 			result.sym = RESOURCE_SYM
-			result.content = r:match "^[^%w%s]%s*(.+)"
+			result.content = r:sub(#RESOURCE_SYM + 1)
 
 		elseif not r:find("%S") then
 			result.sym = EMPTY
@@ -944,11 +1023,185 @@ function patternEscape(pat)
 	return pat:gsub("[%-%+%*%?%.%(%)%[%]%$%^]", "%%%1")
 end
 
+function indent(text, count)
+	return ("\t"):rep(count or 1) .. text:gsub("\n", "\n" .. ("\t"):rep(count or 1))
+end
+
+function blocksToHTML(blocks, options)
+	return table.concat(markup.util.map(function(block) return blockToHTML(block, options) end, blocks), "\n\n")
+end
+
+function blockToHTML(block, options)
+	if block.type == markup.PARAGRAPH then
+		if #block.content == 1 and block.content[1].type == markup.MATH then
+			-- math paragraphs are rendered larger than their inline equivalent
+			return "<img class=\"" .. markup.html.class(HTML_MATH, HTML_BLOCK) .. "\" "
+			.. "alt=\"" .. markup.util.htmlEscape(block.content[1].content) .. "\" "
+			.. "src=\"" .. HTML_MATH_URL .. "%5CLarge%20" .. markup.util.urlEscape(block.content[1].content)
+			.. "\">"
+		else
+			return "<p class=\"" .. markup.html.class(HTML_PARAGRAPH, HTML_BLOCK) .. "\">\n"
+			.. markup.util.indent(inlinesToHTML(block.content, options):gsub("\n", "<br>"))
+			.. "\n</p>"
+		end
+	elseif block.type == markup.HEADER then
+		local content = inlinesToHTML(block.content, options)
+		local id = markup.html.headerID(block)
+		return "<h" .. block.size .. " id=\"" .. id .. "\" "
+		.. "class=\"" .. markup.html.class(HTML_HEADER, HTML_HEADER .. block.size, HTML_BLOCK) .. "\">\n"
+		.. markup.util.indent(content)
+		.. "\n</h" .. block.size .. ">"
+	elseif block.type == markup.LIST then
+		return "<ul class=\"" .. markup.html.class(HTML_LIST, HTML_BLOCK) .. "\">\n"
+		.. markup.util.indent(listElements(block.items, options))
+		.. "\n</ul>"
+	elseif block.type == markup.BLOCK_CODE then
+		local lang = block.language and block.language:lower():gsub("%s", "")
+		local highlighted
+
+		if options.highlighters[lang] then
+			highlighted = tostring(options.highlighters[lang](block.content))
+		else
+			highlighted = "<pre class=\"" .. markup.html.class(HTML_BLOCK_CODE_CONTENT) .. "\">\n"
+			.. markup.util.htmlEscape(block.content)
+			.. "\n</pre>"
+		end
+
+		return "<div"
+		.. (lang and " data-language=" .. lang or "")
+		.. " class=\"" .. markup.html.class(HTML_BLOCK_CODE, HTML_BLOCK) .. "\">"
+		.. highlighted
+		.. "</div>"
+	elseif block.type == markup.BLOCK_QUOTE then
+		return "<blockquote class=\"" .. markup.html.class(HTML_BLOCK_QUOTE, HTML_BLOCK) .. "\">\n"
+		.. blocksToHTML(block.content, options)
+		.. "\n</blockquote>"
+	elseif block.type == markup.RESOURCE then
+		if options.loaders[block.resource_type] then
+			return "<div class=\"" .. markup.html.class(HTML_BLOCK) .. "\">"
+			.. tostring(options.loaders[block.resource_type](block.data))
+			.. "</div>"
+		else
+			return blockFormatError("no resource loader for '" .. block.resource_type .. "' :(")
+		end
+	elseif block.type == markup.HORIZONTAL_RULE then
+		return "<hr class=\"" .. markup.html.class(HTML_HORIZONTAL_RULE, HTML_BLOCK) .. "\">"
+	else
+		return error("internal markup error: unknown block type (" .. tostring(block.type) .. ")")
+	end
+end
+
+function inlinesToHTML(inlines, options)
+	return table.concat(markup.util.map(function(inline) return inlineToHTML(inline, options) end, inlines))
+end
+
+function inlineToHTML(inline, options)
+	if inline.type == markup.TEXT then
+		return "<span class=\"" .. markup.html.class(HTML_TEXT) .. "\">"
+		.. markup.util.htmlEscape(inline.content)
+		.. "</span>"
+	elseif inline.type == markup.VARIABLE then
+		return "<span class=\"" .. markup.html.class(HTML_VARIABLE) .. "\">"
+		.. markup.util.htmlEscape(inline.content)
+		.. "</span>"
+	elseif inline.type == markup.CODE then
+		return "<code class=\"" .. markup.html.class(HTML_CODE) .. "\">"
+		.. markup.util.htmlEscape(inline.content)
+		.. "</code>"
+	elseif inline.type == markup.MATH then
+		return "<img class=\"" .. markup.html.class(HTML_MATH) .. "\" "
+		.. "alt=\"" .. markup.util.htmlEscape(inline.content) .. "\" "
+		.. "src=\"" .. HTML_MATH_URL .. markup.util.urlEscape(inline.content) .. "\">"
+	elseif inline.type == markup.UNDERLINE then
+		return "<u class=\"" .. markup.html.class(HTML_UNDERLINE) .. "\">"
+		.. inlinesToHTML(inline.content, options)
+		.. "</u>"
+	elseif inline.type == markup.BOLD then
+		return "<strong class=\"" .. markup.html.class(HTML_BOLD) .. "\">"
+		.. inlinesToHTML(inline.content, options)
+		.. "</strong>"
+	elseif inline.type == markup.ITALIC then
+		return "<i class=\"" .. markup.html.class(HTML_ITALIC) .. "\">"
+		.. inlinesToHTML(inline.content, options)
+		.. "</i>"
+	elseif inline.type == markup.STRIKETHROUGH then
+		return "<del class=\"" .. markup.html.class(HTML_STRIKETHROUGH) .. "\">"
+		.. inlinesToHTML(inline.content, options)
+		.. "</del>"
+	elseif inline.type == markup.IMAGE then
+		return "<img class=\"" .. markup.html.class(HTML_IMAGE) .. "\" "
+		.. "alt=\"" .. markup.util.htmlEscape(inline.alt_text) .. "\" "
+		.. "src=\"" .. inline.source .. "\">"
+	elseif inline.type == markup.LINK then
+		return "<a class=\"" .. markup.html.class(HTML_LINK) .. "\" "
+		.. "href=\"" .. inline.url .. "\">"
+		.. inlinesToHTML(inline.content, options)
+		.. "</a>"
+	elseif inline.type == markup.REFERENCE then
+		local link = options.reference_link and options.reference_link(inline.reference)
+		if link then
+			return "<a class=\"" .. markup.html.class(HTML_REFERENCE) .. "\" "
+			.. "href=\"" .. tostring(link) .. "\">"
+			.. inlinesToHTML(inline.content, options)
+			.. "</a>"
+		else
+			return formatError("no reference link for '" .. inline.reference .. "' :(")
+		end
+	else
+		return error("internal markup error: unknown inline type (" .. tostring(inline.type) .. ")")
+	end
+end
+
+function listElements(items, options)
+	local lastIndent = items[1].level
+	local baseIndent = lastIndent
+	local s = listItemToHTML(items[1], options)
+
+	local function line(content)
+		s = s .. "\n" .. markup.util.indent(content, lastIndent - baseIndent)
+	end
+
+	for i = 2, #items do
+		for _ = lastIndent, math.max(items[i].level, baseIndent) - 1 do
+			line("<ul class=\"" .. markup.html.class(HTML_LIST) .. "\">"); lastIndent = lastIndent + 1; end
+		for _ = math.max(items[i].level, baseIndent), lastIndent - 1 do
+			lastIndent = lastIndent - 1; line("</ul>"); end
+
+		line(listItemToHTML(items[i]))
+	end
+
+	for i = baseIndent, lastIndent - 1 do
+		lastIndent = lastIndent - 1; line("</ul>"); end
+
+	return s
+end
+
+function listItemToHTML(li, options)
+	return "<li class=\"" .. markup.html.class(HTML_LIST_ITEM) .. "\">\n"
+	.. markup.util.indent(inlinesToHTML(li.content, options))
+	.. "\n</li>"
+end
+
+function formatError(err)
+	return "<span class=\"" .. markup.html.class(HTML_FORMAT_ERROR) .. "\">&lt; " .. markup.util.htmlEscape(err) .. " &gt;</span>"
+end
+
+function blockFormatError(err)
+	return "<p class=\"" .. markup.html.class(HTML_FORMAT_ERROR, HTML_BLOCK) .. "\">&lt; " .. markup.util.htmlEscape(err) .. " &gt;</p>"
+end
+
 markup.util.map = map
 markup.util.get = get
 markup.util.flatMap = flatMap
 markup.util.indexOf = indexOf
 markup.util.patternEscape = patternEscape
 markup.util.last = last
+markup.util.indent = indent
+
+urlEscapeTable = {}
+
+for i = 0, 255 do
+	urlEscapeTable[string.char(i)] = "%" .. ("%02X"):format(i)
+end
 
 return markup

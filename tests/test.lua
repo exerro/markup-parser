@@ -1,6 +1,5 @@
 
 local markup = require "src.markup"
-local html = require "src.html"
 local scan = require "src.scan"
 
 -- local h = io.open("docs.md", "r")
@@ -9,11 +8,9 @@ local scan = require "src.scan"
 -- h:close()
 
 local content = [[
-hello there
-
-@ref
-
-# header
+```
+code
+```
 ]]
 
 parsed = markup.parse(content)
@@ -30,5 +27,14 @@ markup.scan.text(
 
 local h = io.open("out.html", "w")
 h:write("<style> @import url('src/style.css'); </style>\n")
-h:write(html.render(parsed))
+h:write(markup.html.render(parsed, {
+	loaders = {
+		["rtype"] = function(text)
+			return "Resource " .. text
+		end
+	},
+	reference_link = function(ref)
+		return "/" .. ref
+	end
+}))
 h:close()

@@ -81,15 +81,18 @@
 }
 
 .mu-block-code {
-	background-color: #f6f8fa;
-    border-radius: 3px;
+	font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
     font-size: 85%;
     line-height: 1.45;
+}
+
+.mu-block-code-content {
+	background-color: #f6f8fa;
+    border-radius: 3px;
     padding: 16px;
 }
 
-.mu-block-code pre {
-	font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+.mu-block-code-content pre {
 	margin: 0;
 }
 
