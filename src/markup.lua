@@ -564,6 +564,12 @@ function markup.filter.new(f)
 	})
 end
 
+function markup.filter.equals(object)
+	return markup.filter.new(function(item)
+		return item == object
+	end)
+end
+
 function markup.filter.type(type)
 	return markup.filter.new(function(item)
 		return item.type == type

@@ -34,6 +34,14 @@ filter markup.filter.new((node -> bool) predicate)
 
 Creates a new filter from a predicate.
 
+### markup.filter.equals
+
+```
+filter markup.filter.equals(node)
+```
+
+Returns a filter matching only nodes equal to $`node`
+
 ### markup.filter.type
 
 ```
