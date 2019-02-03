@@ -546,7 +546,7 @@ function markup.filter.new(f)
 				return self(...) and other(...)
 			end)
 		end,
-		__sub = function(self)
+		__sub = function(self, other)
 			return markup.filter.new(function(...)
 				return self(...) and not other(...)
 			end)
