@@ -546,11 +546,21 @@ function markup.filter.new(f)
 				return self(...) and other(...)
 			end)
 		end,
+		__sub = function(self)
+			return markup.filter.new(function(...)
+				return self(...) and not other(...)
+			end)
+		end,
 		__div = function(self, other)
 			return markup.filter.new(function(...)
 				return self(...) or other(...)
 			end)
 		end,
+		__unm = function(self)
+			return markup.filter.new(function(...)
+				return not self(...)
+			end)
+		end
 	})
 end
 
