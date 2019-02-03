@@ -42,6 +42,10 @@ They're referenced like `::resource_type ...data`, and when the document goes to
 
 For example, you might want to embed a code editor in the document. You might use `::interactive-editor lua`, and give in `function(language) return ... end` as `options.loaders["interactive-editor"]`.
 
+### Data
+
+You can embed data in a document using `{:data_type data}`, e.g. `{:author ben}`. These sections aren't rendered at all.
+
 ### References
 
 As the library is intended for use with not just single documents, but sets of documents, referencing between them will be a common thing. References are designed to handle this: `@ref` or `@{ref}`, with the latter supporting spaces. When a reference goes to be rendered, it'll pass through a function or table $`reference_link` in the HTML render options, to get its URL.
@@ -251,6 +255,12 @@ markup.image(string alt_text, string source)
 
 ```
 markup.link(inline_node[] content, string url)
+```
+
+---
+
+```
+markup.data(string data_type, string data)
 ```
 
 ---

@@ -44,6 +44,7 @@ local VARIABLE_SYM = "$"
 local CODE_SYM = "`"
 local MATH_SYM = "$$"
 local REFERENCE_SYM = "@"
+local DATA_SYM = ":"
 
 local LINE_COMMENT = "//"
 local EMPTY = "empty"
@@ -86,6 +87,7 @@ markup.ITALIC = "italic"
 markup.STRIKETHROUGH = "strikethrough"
 markup.IMAGE = "image"
 markup.LINK = "link"
+markup.DATA = "data"
 markup.REFERENCE = "reference"
 
 -- block types
@@ -189,6 +191,14 @@ function markup.link(text, url)
 	}
 end
 
+function markup.data(data_type, data)
+	return {
+		type = markup.DATA,
+		data_type = data_type,
+		data = data
+	}
+end
+
 function markup.reference(text, reference)
 	if type(text) == "string" then
 		text = markup.parse_text(text)
@@ -287,6 +297,7 @@ function markup.is_inline(item)
 	    or item.type == markup.STRIKETHROUGH
 	    or item.type == markup.IMAGE
 	    or item.type == markup.LINK
+	    or item.type == markup.DATA
 	    or item.type == markup.REFERENCE
 end
 
@@ -344,6 +355,8 @@ function markup.tostring(item)
 			return "![" .. item.alt_text .. "](" .. item.source .. ")"
 		elseif item.type == markup.LINK then
 			return "[" .. markup.tostring(item.content) .. "](" .. item.url .. ")"
+		elseif item.type == markup.DATA then
+			return "{:" .. item.data_type .. " " .. item.data .. "}"
 		elseif item.type == markup.REFERENCE then
 			return "@{" .. markup.tostring(item.content) .. " :: " .. item.reference .. "}"
 		else
@@ -622,7 +635,8 @@ function markup.parse_text(text)
 			pattern_escape(UNDERLINE_SYM), -- underline
 			pattern_escape(BOLD_SYM), -- bold
 			pattern_escape(ITALIC_SYM), -- italic
-			pattern_escape(STRIKETHROUGH_SYM) -- strikethrough
+			pattern_escape(STRIKETHROUGH_SYM), -- strikethrough
+			"{" .. pattern_escape(DATA_SYM) .. ".-}" -- data
 		})
 
 		if s then
@@ -659,6 +673,10 @@ function markup.parse_text(text)
 				mod(ITALIC_SYM, markup.italic)
 			elseif b == 12 then
 				mod(STRIKETHROUGH_SYM, markup.strikethrough)
+			elseif b == 13 then
+				local s = r:sub(#DATA_SYM + 2, -2)
+				local dt = s:match "^[%w+_%-]+" or ""
+				push(markup.data(dt, s:sub(#dt + 1):gsub("^%s*", "")))
 			end
 
 			i = f + 1
@@ -674,6 +692,7 @@ function markup.parse_text(text)
 			.. pattern_escape(BOLD_SYM)
 			.. pattern_escape(ITALIC_SYM)
 			.. pattern_escape(STRIKETHROUGH_SYM)
+			.. pattern_escape(DATA_SYM)
 			.. "]+", i)
 			or text:match("^\\.", i)
 			or text:sub(i, i)
@@ -1116,6 +1135,8 @@ function inline_to_html(inline, options)
 		.. "href=\"" .. inline.url .. "\">"
 		.. inlines_to_html(inline.content, options)
 		.. "</a>"
+	elseif inline.type == markup.DATA then
+		return ""
 	elseif inline.type == markup.REFERENCE then
 		local link
 		
@@ -1134,7 +1155,7 @@ function inline_to_html(inline, options)
 			return format_error("no reference link for '" .. inline.reference .. "'")
 		end
 	else
-		return error("internal markup error: unknown inline type (" .. tostring(inline.type) .. ")")
+		return error("internal markup error: unknown inline type (" .. tostring(inline.type) .. ")", 0)
 	end
 end
 
