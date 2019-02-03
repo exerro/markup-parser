@@ -652,7 +652,7 @@ function markup.parse_text(text)
 	while i <= #text do
 		local b, s, f, r = find_matches(text, i, {
 			"%[[^%[%]]+%]%([^%(%)]+%)", -- link
-			"!%[[^%[%]]+%]%([^%(%)]+%)", -- image
+			"!%[[^%[%]]*%]%([^%(%)]+%)", -- image
 			"%[%[[^%[%]]+%]%]", -- relative link
 			pattern_escape(REFERENCE_SYM) .. "{[^{}]+}", -- reference 1
 			pattern_escape(REFERENCE_SYM) .. "%S+", -- reference 2
@@ -675,8 +675,8 @@ function markup.parse_text(text)
 				))
 			elseif b == 2 then
 				push(markup.image(
-					r:match "^%[(.-)%]",
-					r:match "^%[.-%]%((.+)%)"
+					r:match "^!%[(.-)%]",
+					r:match "^!%[.-%]%((.+)%)"
 				))
 			elseif b == 3 then
 				local p = markup.parse_text(r:sub(3, -3))
