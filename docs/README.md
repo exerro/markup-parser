@@ -3,6 +3,14 @@
 
 The markup library is used for parsing, manipulating, and rendering markup files.
 
+## Submodules
+
+* [filter](docs/filter.md)
+* [HTML](docs/html.md)
+* [scan](docs/scan.md)
+* [update](docs/update.md)
+* [util](docs/util.md)
+
 ## Syntax
 
 The syntax is very similar to markdown.
@@ -71,39 +79,39 @@ Smaller: $$ |v| = \sqrt{\sum v_i^2} $$
 ### markup.parse
 
 ```
-inline_node[] markup.parse(string document)
+block_node[] markup.parse(string document)
 ```
 
 Parses a document, returning its AST.
 
-### markup.parse_text
+### markup.parse\_text
 
 ```
-block_node[] markup.parse_text(string text)
+inline_node[] markup.parse_text(string text)
 ```
 
 Parses some inline text, returning its AST.
 
-### markup.isNode
+### markup.is\_node
 
 ```
-boolean markup.isNode(any value)
+boolean markup.is_node(any value)
 ```
 
 Returns `true` if the value is a node
 
-### markup.isBlock
+### markup.is\_block
 
 ```
-boolean markup.isBlock(node value)
+boolean markup.is_block(node value)
 ```
 
 Returns `true` if the value is a block node
 
-### markup.isInline
+### markup.is\_inline
 
 ```
-boolean markup.isInline(node value)
+boolean markup.is_inline(node value)
 ```
 
 Returns `true` if the value is an inline node
@@ -130,13 +138,13 @@ The constructors don't check parameters. However, For all parameters of type `in
 #### Block nodes
 
 ```
-markup.paragraph(inline_node[] text)
+markup.paragraph(inline_node[] content)
 ```
 
 ---
 
 ```
-markup.header(inline_node[] text, int size)
+markup.header(inline_node[] content, int size)
 ```
 
 > $`size` is an integer between 1 and 6, corresponding to `h1`, `h3`, `h6` etc in the html.
@@ -158,7 +166,7 @@ markup.list(table items)
 ---
 
 ```
-markup.code_block(string code, string? language)
+markup.code_block(string content, string? language)
 ```
 
 ---
@@ -184,13 +192,13 @@ markup.rule()
 #### Inline nodes
 
 ```
-markup.text(string text)
+markup.text(string content)
 ```
 
 ---
 
 ```
-markup.variable(string text)
+markup.variable(string content)
 ```
 
 > See [Variables](#variables)
@@ -198,13 +206,13 @@ markup.variable(string text)
 ---
 
 ```
-markup.code(string text)
+markup.code(string content)
 ```
 
 ---
 
 ```
-markup.math(string text)
+markup.math(string content)
 ```
 
 > See [Maths](#maths)
@@ -212,25 +220,25 @@ markup.math(string text)
 ---
 
 ```
-markup.underline(inline_node[] text)
+markup.underline(inline_node[] content)
 ```
 
 ---
 
 ```
-markup.bold(inline_node[] text)
+markup.bold(inline_node[] content)
 ```
 
 ---
 
 ```
-markup.italic(inline_node[] text)
+markup.italic(inline_node[] content)
 ```
 
 ---
 
 ```
-markup.strikethrough(inline_node[] text)
+markup.strikethrough(inline_node[] content)
 ```
 
 ---
@@ -242,14 +250,14 @@ markup.image(string alt_text, string source)
 ---
 
 ```
-markup.link(inline_node[] text, string url)
+markup.link(inline_node[] content, string url)
 ```
 
 ---
 
 ```
-markup.reference(inline_node[] text, string? reference)
+markup.reference(inline_node[] content, string? reference)
 ```
 
-> If $`reference` isn't given (is falsey), it will be derived from $`text`
+> If $`reference` isn't given (is falsey), it will be derived from $`content`
 > See [References](#references)

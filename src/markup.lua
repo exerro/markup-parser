@@ -49,21 +49,20 @@ local LINE_COMMENT = "//"
 local EMPTY = "empty"
 
 -- utility functions
-local genericScan
-local splitContentIntoLines, removeCommentLines, groupCodeLines, formatLines
-local makeBlocksFromEmptyLines, makeBlocksFromDifferentSyms
-local createBlock
-local parseTextInline, applyItemInlines, applyItemInline
-local findMatch
-local insert, last, map, flatMap, indexOf
+local generic_scan
+local split_content_into_lines, remove_comment_lines, group_code_lines, format_lines
+local make_blocks_from_empty_lines, make_blocks_from_different_syms
+local create_block
+local find_matches
+local insert, last, map, flat_map, index_of
 local remove = table.remove
 local get
-local patternEscape
+local pattern_escape
 local indent
-local urlEscapeTable
-local blocksToHTML, blockToHTML, inlinesToHTML, inlineToHTML
-local listElements, listItemToHTML
-local formatError, blockFormatError
+local url_escape_table
+local blocks_to_html, block_to_html, inlines_to_html, inline_to_html
+local list_elements, list_item_to_html
+local format_error, block_format_error
 
 local markup = {}
 
@@ -196,7 +195,7 @@ function markup.reference(text, reference)
 	end
 
 	if not reference then
-		reference = table.concat(map(get("content"), markup.scan.findAllText(text, markup.filter.hasText)))
+		reference = table.concat(map(get("content"), markup.scan.find_all_text(text, markup.filter.has_text)))
 	end
 	
 	return {
@@ -273,13 +272,11 @@ function markup.rule()
 	return { type = markup.HORIZONTAL_RULE }
 end
 
--- returns true if an item is a node
-function markup.isNode(item)
-	return type(item) == "table" and (markup.isInline(item) or markup.isBlock(item))
+function markup.is_node(item)
+	return type(item) == "table" and (markup.is_inline(item) or markup.is_block(item))
 end
 
--- returns true if an item is an inline
-function markup.isInline(item)
+function markup.is_inline(item)
 	return item.type == markup.TEXT
 	    or item.type == markup.VARIABLE
 	    or item.type == markup.CODE
@@ -293,8 +290,7 @@ function markup.isInline(item)
 	    or item.type == markup.REFERENCE
 end
 
--- returns true if an item is a block
-function markup.isBlock(item)
+function markup.is_block(item)
 	return item.type == markup.PARAGRAPH
 	    or item.type == markup.HEADER
 	    or item.type == markup.LIST
@@ -365,17 +361,14 @@ function markup.tostring(item)
 		ss[i] = markup.tostring(item[i])
 	end
 
-	return table.concat(ss, markup.isBlock(item[1]) and "\n\n" or "")
+	return table.concat(ss, markup.is_block(item[1]) and "\n\n" or "")
 end
 
--- options.filter
--- options.no_filter_stop
--- options.deep_scan (defaults to true)
 function markup.scan:document(f, options)
 	options = options or {}
 	options.deep_scan = options.deep_scan == nil or options.deep_scan
 
-	genericScan(f, options, function(t)
+	generic_scan(f, options, function(t)
 		for i = 1, #self do
 			t[i] = self[i]
 		end
@@ -388,15 +381,11 @@ function markup.scan:document(f, options)
 	end)
 end
 
--- options.filter
--- options.block_filter
--- options.no_filter_stop
--- options.deep_scan
 function markup.scan:text(f, options)
 	options = options or {}
 	options.deep_scan = options.deep_scan == nil or options.deep_scan
 
-	if self[1] and markup.isInline(self[1]) then
+	if self[1] and markup.is_inline(self[1]) then
 		self = {{ type = markup.PARAGRAPH, content = self }}
 	end
 
@@ -419,7 +408,7 @@ function markup.scan:text(f, options)
 			end
 		end
 
-		return genericScan(f, options, populate, function(inline)
+		return generic_scan(f, options, populate, function(inline)
 			if inline.type == markup.UNDERLINE
 			or inline.type == markup.BOLD
 			or inline.type == markup.ITALIC
@@ -438,7 +427,7 @@ function markup.scan:text(f, options)
 	})
 end
 
-function markup.scan:findFirst(matching, deep_scan)
+function markup.scan:find_first(matching, deep_scan)
 	local result
 
 	options = options or {}
@@ -454,7 +443,7 @@ function markup.scan:findFirst(matching, deep_scan)
 	return result
 end
 
-function markup.scan:findAll(matching, deep_scan)
+function markup.scan:find_all(matching, deep_scan)
 	local results = {}
 
 	options = options or {}
@@ -469,7 +458,7 @@ function markup.scan:findAll(matching, deep_scan)
 	return results
 end
 
-function markup.scan:findFirstText(matching, deep_scan)
+function markup.scan:find_first_text(matching, deep_scan)
 	local result
 
 	options = options or {}
@@ -485,7 +474,7 @@ function markup.scan:findFirstText(matching, deep_scan)
 	return result
 end
 
-function markup.scan:findAllText(matching, deep_scan)
+function markup.scan:find_all_text(matching, deep_scan)
 	local results = {}
 
 	options = options or {}
@@ -500,9 +489,6 @@ function markup.scan:findAllText(matching, deep_scan)
 	return results
 end
 
--- options.highlighters[language]
--- options.loaders[resource_type]
--- options.reference_link
 function markup.html.render(document, options)
 	options = options or {}
 	options = {
@@ -516,14 +502,14 @@ function markup.html.render(document, options)
 	end
 
 	return "\n<div class=\"" .. markup.html.class(HTML_CONTENT) .. "\">\n"
-	    .. blocksToHTML(document, options)
+	    .. blocks_to_html(document, options)
 	    .. "\n</div>"
 end
 
 function markup.html.headerID(headerNode)
-	return table.concat(map(get("content"), markup.scan.findAllText(
+	return table.concat(map(get("content"), markup.scan.find_all_text(
 		headerNode.content,
-		markup.filter.hasText
+		markup.filter.has_text
 	))):gsub("<.->", "")
 	   :gsub("^%s+", "")
 	   :gsub("%s+$", "")
@@ -562,17 +548,17 @@ function markup.filter.type(type)
 end
 
 markup.filter.inline
-= markup.filter.new(markup.isInline)
+= markup.filter.new(markup.is_inline)
 
 markup.filter.block
-= markup.filter.new(markup.isBlock)
+= markup.filter.new(markup.is_block)
 
-markup.filter.hasText
+markup.filter.has_text
 = markup.filter.type(markup.TEXT)
 / markup.filter.type(markup.VARIABLE)
 / markup.filter.type(markup.CODE)
 
-function markup.util.htmlEscape(text)
+function markup.util.html_escape(text)
 	return text:gsub("[&/<>\"]", {
 		["&"] = "&amp;",
 		["/"] = "&#47;",
@@ -582,19 +568,17 @@ function markup.util.htmlEscape(text)
 	})
 end
 
-function markup.util.urlEscape(text)
-	return text:gsub("[^a-zA-Z0-9_\\]", urlEscapeTable)
+function markup.util.url_escape(text)
+	return text:gsub("[^a-zA-Z0-9_\\]", url_escape_table)
 end
 
--- parses a string into a list of blocks
 function markup.parse(content)
-	local lines = formatLines(removeCommentLines(groupCodeLines(splitContentIntoLines(content))))
-	local blocks = flatMap(makeBlocksFromDifferentSyms, makeBlocksFromEmptyLines(lines))
+	local lines = format_lines(remove_comment_lines(group_code_lines(split_content_into_lines(content))))
+	local blocks = flat_map(make_blocks_from_different_syms, make_blocks_from_empty_lines(lines))
 
-	return map(createBlock, blocks)
+	return map(create_block, blocks)
 end
 
--- parses a string of text into a list of inlines
 function markup.parse_text(text)
 	local result = {}
 	local value_stack = {result}
@@ -612,7 +596,7 @@ function markup.parse_text(text)
 	end
 
 	local function mod(sym, create)
-		local idx = indexOf(sym, modifiers)
+		local idx = index_of(sym, modifiers)
 
 		if idx then
 			for i = idx, #value_stack - 1 do
@@ -626,19 +610,19 @@ function markup.parse_text(text)
 	end
 
 	while i <= #text do
-		local b, s, f, r = findMatch(text, i, {
+		local b, s, f, r = find_matches(text, i, {
 			"%[[^%[%]]+%]%([^%(%)]+%)", -- link
 			"!%[[^%[%]]+%]%([^%(%)]+%)", -- image
 			"%[%[[^%[%]]+%]%]", -- relative link
-			patternEscape(REFERENCE_SYM) .. "{[^{}]+}", -- reference 1
-			patternEscape(REFERENCE_SYM) .. "%S+", -- reference 2
-			patternEscape(MATH_SYM) .. "[^" .. patternEscape(MATH_SYM) .. "]+" .. patternEscape(MATH_SYM), -- math
-			patternEscape(VARIABLE_SYM) .. "`[^`]+`", -- variable
-			{patternEscape(CODE_SYM) .. "+"}, -- code
-			patternEscape(UNDERLINE_SYM), -- underline
-			patternEscape(BOLD_SYM), -- bold
-			patternEscape(ITALIC_SYM), -- italic
-			patternEscape(STRIKETHROUGH_SYM) -- strikethrough
+			pattern_escape(REFERENCE_SYM) .. "{[^{}]+}", -- reference 1
+			pattern_escape(REFERENCE_SYM) .. "%S+", -- reference 2
+			pattern_escape(MATH_SYM) .. "[^" .. pattern_escape(MATH_SYM) .. "]+" .. pattern_escape(MATH_SYM), -- math
+			pattern_escape(VARIABLE_SYM) .. "`[^`]+`", -- variable
+			{pattern_escape(CODE_SYM) .. "+"}, -- code
+			pattern_escape(UNDERLINE_SYM), -- underline
+			pattern_escape(BOLD_SYM), -- bold
+			pattern_escape(ITALIC_SYM), -- italic
+			pattern_escape(STRIKETHROUGH_SYM) -- strikethrough
 		})
 
 		if s then
@@ -655,7 +639,7 @@ function markup.parse_text(text)
 				))
 			elseif b == 3 then
 				local p = markup.parse_text(r:sub(3, -3))
-				push(markup.link(p, table.concat(map(get("content"), markup.scan.findAllText(p, markup.filter.hasText)))))
+				push(markup.link(p, table.concat(map(get("content"), markup.scan.find_all_text(p, markup.filter.has_text)))))
 			elseif b == 4 then
 				push(markup.reference(r:sub(#REFERENCE_SYM + 2, -2)))
 			elseif b == 5 then
@@ -665,7 +649,7 @@ function markup.parse_text(text)
 			elseif b == 7 then
 				push(markup.variable(r:sub(#VARIABLE_SYM + 2, -2)))
 			elseif b == 8 then
-				local l = #r:match(patternEscape(CODE_SYM) .. "+")
+				local l = #r:match(pattern_escape(CODE_SYM) .. "+")
 				push(markup.code(r:sub(l + 1, -l - 1)))
 			elseif b == 9 then
 				mod(UNDERLINE_SYM, markup.underline)
@@ -680,19 +664,21 @@ function markup.parse_text(text)
 			i = f + 1
 		else
 			local segment = text:match("^[^"
-			.. "%[%]{}%(%)!`"
-			.. patternEscape(REFERENCE_SYM)
-			.. patternEscape(REFERENCE_SYM)
-			.. patternEscape(MATH_SYM)
-			.. patternEscape(VARIABLE_SYM)
-			.. patternEscape(CODE_SYM)
-			.. patternEscape(UNDERLINE_SYM)
-			.. patternEscape(BOLD_SYM)
-			.. patternEscape(ITALIC_SYM)
-			.. patternEscape(STRIKETHROUGH_SYM)
-			.. "]+", i) or text:sub(i, i)
+			.. "%[%]{}%(%)!`\\"
+			.. pattern_escape(REFERENCE_SYM)
+			.. pattern_escape(REFERENCE_SYM)
+			.. pattern_escape(MATH_SYM)
+			.. pattern_escape(VARIABLE_SYM)
+			.. pattern_escape(CODE_SYM)
+			.. pattern_escape(UNDERLINE_SYM)
+			.. pattern_escape(BOLD_SYM)
+			.. pattern_escape(ITALIC_SYM)
+			.. pattern_escape(STRIKETHROUGH_SYM)
+			.. "]+", i)
+			or text:match("^\\.", i)
+			or text:sub(i, i)
 
-			push(markup.text(segment))
+			push(markup.text(segment:gsub("^\\", "")))
 			i = i + #segment
 		end
 	end
@@ -705,7 +691,7 @@ function markup.parse_text(text)
 
 end
 
-function genericScan(f, options, populate, children_of)
+function generic_scan(f, options, populate, children_of)
 	local toScan = {}
 	local i = 1
 
@@ -735,7 +721,7 @@ function genericScan(f, options, populate, children_of)
 end
 
 -- splits a string into a list of its lines
-function splitContentIntoLines(text)
+function split_content_into_lines(text)
 	local lines = {}
 	local p = 1
 	local s, f = text:find("\r?\n")
@@ -752,7 +738,7 @@ function splitContentIntoLines(text)
 end
 
 -- groups lines between multi-line code tags into a single line
-function groupCodeLines(lines)
+function group_code_lines(lines)
 	local result = {}
 	local inCode = false
 
@@ -776,11 +762,11 @@ function groupCodeLines(lines)
 end
 
 -- removes lines containing only a comment
-function removeCommentLines(lines)
+function remove_comment_lines(lines)
 	local result = {}
 
 	for i = 1, #lines do
-		if lines[i]:find("^%s*" .. patternEscape(LINE_COMMENT)) then
+		if lines[i]:find("^%s*" .. pattern_escape(LINE_COMMENT)) then
 			result[i] = ""
 		else
 			result[i] = lines[i]
@@ -792,7 +778,7 @@ end
 
 -- turns a list of lines into a structure with { indentation, sym, content }
 -- `sym` is the beginning symbolic operator (e.g. '#' for a header)
-function formatLines(lines)
+function format_lines(lines)
 	local output = {}
 
 	for i = 1, #lines do
@@ -820,10 +806,10 @@ function formatLines(lines)
 			result.sym = BLOCK_QUOTE_SYM
 			result.content = r:sub(#BLOCK_QUOTE_SYM + 2)
 
-		elseif r:find("^" .. patternEscape(HEADER_SYM) .. "+%s") then
+		elseif r:find("^" .. pattern_escape(HEADER_SYM) .. "+%s") then
 			result.sym = HEADER_SYM
-			result.size = #r:match("^" .. patternEscape(HEADER_SYM) .. "+")
-			result.content = r:match("^" .. patternEscape(HEADER_SYM) .. "+%s+(.+)")
+			result.size = #r:match("^" .. pattern_escape(HEADER_SYM) .. "+")
+			result.content = r:match("^" .. pattern_escape(HEADER_SYM) .. "+%s+(.+)")
 
 		elseif r:sub(1, #RESOURCE_SYM) == RESOURCE_SYM then
 			result.sym = RESOURCE_SYM
@@ -841,7 +827,7 @@ function formatLines(lines)
 end
 
 -- makes groups of lines, delimited by EMPTY lines (not included in return)
-function makeBlocksFromEmptyLines(lines)
+function make_blocks_from_empty_lines(lines)
 	local i = 1
 	local blocks = {{}}
 
@@ -871,7 +857,7 @@ end
 -- splits a group of lines into more groups of lines, subject to the following rules
 --  each group may only have one line type
 --  only one line may exist in a group if its type is one of {HEADER_SYM, BLOCK_CODE_SYM, RULE_SYM, RESOURCE_SYM}
-function makeBlocksFromDifferentSyms(lines)
+function make_blocks_from_different_syms(lines)
 	if #lines == 0 then
 		return {}
 	end
@@ -896,7 +882,7 @@ function makeBlocksFromDifferentSyms(lines)
 end
 
 -- creates a markup block from a group of lines
-function createBlock(lines)
+function create_block(lines)
 	local blockSym = lines[1].sym
 
 	if blockSym == "" then
@@ -916,7 +902,7 @@ function createBlock(lines)
 	elseif blockSym == BLOCK_CODE_SYM then
 		return markup.code_block(
 			lines[1].content:match("\n(.*)$") or "",
-			lines[1].content:match("([^\n]+)\n")
+			lines[1].content:match("^([^\n]+)\n")
 		)
 
 	elseif blockSym == BLOCK_QUOTE_SYM then
@@ -939,7 +925,7 @@ end
 
 -- finds a match of one of many patterns against a string
 -- each pattern may be a table containing one item, indicating that match is an open/close tag
-function findMatch(text, pos, patterns)
+function find_matches(text, pos, patterns)
 	for i = 1, #patterns do
 		local pat = type(patterns[i]) == "table" and patterns[i][1] or patterns[i]
 		local s, f = text:find("^" .. pat, pos)
@@ -968,12 +954,10 @@ function insert(table, item, ...)
 	end
 end
 
--- returns the last item in a table
 function last(list)
 	return list[#list]
 end
 
--- applies a function to every item in a list, returning a new list
 function map(f, list)
 	local result = {}
 
@@ -984,9 +968,7 @@ function map(f, list)
 	return result
 end
 
--- applies a function to every item in a list, returning a new list which is the concatenation of results
--- 	f :: p -> [r]
-function flatMap(f, list)
+function flat_map(f, list)
 	local result = {}
 
 	for i = 1, #list do
@@ -1000,8 +982,7 @@ function flatMap(f, list)
 	return result
 end
 
--- finds the index of an item in a list
-function indexOf(item, list)
+function index_of(item, list)
 	for i = 1, #list do
 		if list[i] == item then
 			return i
@@ -1011,15 +992,13 @@ function indexOf(item, list)
 	return nil
 end
 
--- returns a function which takes an object and returns the specified index in that object
 function get(index)
 	return function(object)
 		return object[index]
 	end
 end
 
--- escapes a string w.r.t. Lua patterns
-function patternEscape(pat)
+function pattern_escape(pat)
 	return pat:gsub("[%-%+%*%?%.%(%)%[%]%$%^]", "%%%1")
 end
 
@@ -1027,25 +1006,25 @@ function indent(text, count)
 	return ("\t"):rep(count or 1) .. text:gsub("\n", "\n" .. ("\t"):rep(count or 1))
 end
 
-function blocksToHTML(blocks, options)
-	return table.concat(markup.util.map(function(block) return blockToHTML(block, options) end, blocks), "\n\n")
+function blocks_to_html(blocks, options)
+	return table.concat(markup.util.map(function(block) return block_to_html(block, options) end, blocks), "\n\n")
 end
 
-function blockToHTML(block, options)
+function block_to_html(block, options)
 	if block.type == markup.PARAGRAPH then
 		if #block.content == 1 and block.content[1].type == markup.MATH then
 			-- math paragraphs are rendered larger than their inline equivalent
 			return "<img class=\"" .. markup.html.class(HTML_MATH, HTML_BLOCK) .. "\" "
-			.. "alt=\"" .. markup.util.htmlEscape(block.content[1].content) .. "\" "
-			.. "src=\"" .. HTML_MATH_URL .. "%5CLarge%20" .. markup.util.urlEscape(block.content[1].content)
+			.. "alt=\"" .. markup.util.html_escape(block.content[1].content) .. "\" "
+			.. "src=\"" .. HTML_MATH_URL .. "%5CLarge%20" .. markup.util.url_escape(block.content[1].content)
 			.. "\">"
 		else
 			return "<p class=\"" .. markup.html.class(HTML_PARAGRAPH, HTML_BLOCK) .. "\">\n"
-			.. markup.util.indent(inlinesToHTML(block.content, options):gsub("\n", "<br>"))
+			.. markup.util.indent(inlines_to_html(block.content, options):gsub("\n", "<br>"))
 			.. "\n</p>"
 		end
 	elseif block.type == markup.HEADER then
-		local content = inlinesToHTML(block.content, options)
+		local content = inlines_to_html(block.content, options)
 		local id = markup.html.headerID(block)
 		return "<h" .. block.size .. " id=\"" .. id .. "\" "
 		.. "class=\"" .. markup.html.class(HTML_HEADER, HTML_HEADER .. block.size, HTML_BLOCK) .. "\">\n"
@@ -1053,7 +1032,7 @@ function blockToHTML(block, options)
 		.. "\n</h" .. block.size .. ">"
 	elseif block.type == markup.LIST then
 		return "<ul class=\"" .. markup.html.class(HTML_LIST, HTML_BLOCK) .. "\">\n"
-		.. markup.util.indent(listElements(block.items, options))
+		.. markup.util.indent(list_elements(block.items, options))
 		.. "\n</ul>"
 	elseif block.type == markup.BLOCK_CODE then
 		local lang = block.language and block.language:lower():gsub("%s", "")
@@ -1063,7 +1042,7 @@ function blockToHTML(block, options)
 			highlighted = tostring(options.highlighters[lang](block.content))
 		else
 			highlighted = "<pre class=\"" .. markup.html.class(HTML_BLOCK_CODE_CONTENT) .. "\">\n"
-			.. markup.util.htmlEscape(block.content)
+			.. markup.util.html_escape(block.content)
 			.. "\n</pre>"
 		end
 
@@ -1074,7 +1053,7 @@ function blockToHTML(block, options)
 		.. "</div>"
 	elseif block.type == markup.BLOCK_QUOTE then
 		return "<blockquote class=\"" .. markup.html.class(HTML_BLOCK_QUOTE, HTML_BLOCK) .. "\">\n"
-		.. blocksToHTML(block.content, options)
+		.. blocks_to_html(block.content, options)
 		.. "\n</blockquote>"
 	elseif block.type == markup.RESOURCE then
 		if options.loaders[block.resource_type] then
@@ -1082,7 +1061,7 @@ function blockToHTML(block, options)
 			.. tostring(options.loaders[block.resource_type](block.data))
 			.. "</div>"
 		else
-			return blockFormatError("no resource loader for '" .. block.resource_type .. "' :(")
+			return block_format_error("no resource loader for '" .. block.resource_type .. "' :(")
 		end
 	elseif block.type == markup.HORIZONTAL_RULE then
 		return "<hr class=\"" .. markup.html.class(HTML_HORIZONTAL_RULE, HTML_BLOCK) .. "\">"
@@ -1091,51 +1070,51 @@ function blockToHTML(block, options)
 	end
 end
 
-function inlinesToHTML(inlines, options)
-	return table.concat(markup.util.map(function(inline) return inlineToHTML(inline, options) end, inlines))
+function inlines_to_html(inlines, options)
+	return table.concat(markup.util.map(function(inline) return inline_to_html(inline, options) end, inlines))
 end
 
-function inlineToHTML(inline, options)
+function inline_to_html(inline, options)
 	if inline.type == markup.TEXT then
 		return "<span class=\"" .. markup.html.class(HTML_TEXT) .. "\">"
-		.. markup.util.htmlEscape(inline.content)
+		.. markup.util.html_escape(inline.content)
 		.. "</span>"
 	elseif inline.type == markup.VARIABLE then
 		return "<span class=\"" .. markup.html.class(HTML_VARIABLE) .. "\">"
-		.. markup.util.htmlEscape(inline.content)
+		.. markup.util.html_escape(inline.content)
 		.. "</span>"
 	elseif inline.type == markup.CODE then
 		return "<code class=\"" .. markup.html.class(HTML_CODE) .. "\">"
-		.. markup.util.htmlEscape(inline.content)
+		.. markup.util.html_escape(inline.content)
 		.. "</code>"
 	elseif inline.type == markup.MATH then
 		return "<img class=\"" .. markup.html.class(HTML_MATH) .. "\" "
-		.. "alt=\"" .. markup.util.htmlEscape(inline.content) .. "\" "
-		.. "src=\"" .. HTML_MATH_URL .. markup.util.urlEscape(inline.content) .. "\">"
+		.. "alt=\"" .. markup.util.html_escape(inline.content) .. "\" "
+		.. "src=\"" .. HTML_MATH_URL .. markup.util.url_escape(inline.content) .. "\">"
 	elseif inline.type == markup.UNDERLINE then
 		return "<u class=\"" .. markup.html.class(HTML_UNDERLINE) .. "\">"
-		.. inlinesToHTML(inline.content, options)
+		.. inlines_to_html(inline.content, options)
 		.. "</u>"
 	elseif inline.type == markup.BOLD then
 		return "<strong class=\"" .. markup.html.class(HTML_BOLD) .. "\">"
-		.. inlinesToHTML(inline.content, options)
+		.. inlines_to_html(inline.content, options)
 		.. "</strong>"
 	elseif inline.type == markup.ITALIC then
 		return "<i class=\"" .. markup.html.class(HTML_ITALIC) .. "\">"
-		.. inlinesToHTML(inline.content, options)
+		.. inlines_to_html(inline.content, options)
 		.. "</i>"
 	elseif inline.type == markup.STRIKETHROUGH then
 		return "<del class=\"" .. markup.html.class(HTML_STRIKETHROUGH) .. "\">"
-		.. inlinesToHTML(inline.content, options)
+		.. inlines_to_html(inline.content, options)
 		.. "</del>"
 	elseif inline.type == markup.IMAGE then
 		return "<img class=\"" .. markup.html.class(HTML_IMAGE) .. "\" "
-		.. "alt=\"" .. markup.util.htmlEscape(inline.alt_text) .. "\" "
+		.. "alt=\"" .. markup.util.html_escape(inline.alt_text) .. "\" "
 		.. "src=\"" .. inline.source .. "\">"
 	elseif inline.type == markup.LINK then
 		return "<a class=\"" .. markup.html.class(HTML_LINK) .. "\" "
 		.. "href=\"" .. inline.url .. "\">"
-		.. inlinesToHTML(inline.content, options)
+		.. inlines_to_html(inline.content, options)
 		.. "</a>"
 	elseif inline.type == markup.REFERENCE then
 		local link
@@ -1149,20 +1128,20 @@ function inlineToHTML(inline, options)
 		if link then
 			return "<a class=\"" .. markup.html.class(HTML_REFERENCE) .. "\" "
 			.. "href=\"" .. tostring(link) .. "\">"
-			.. inlinesToHTML(inline.content, options)
+			.. inlines_to_html(inline.content, options)
 			.. "</a>"
 		else
-			return formatError("no reference link for '" .. inline.reference .. "'")
+			return format_error("no reference link for '" .. inline.reference .. "'")
 		end
 	else
 		return error("internal markup error: unknown inline type (" .. tostring(inline.type) .. ")")
 	end
 end
 
-function listElements(items, options)
+function list_elements(items, options)
 	local lastIndent = items[1].level
 	local baseIndent = lastIndent
-	local s = listItemToHTML(items[1], options)
+	local s = list_item_to_html(items[1], options)
 
 	local function line(content)
 		s = s .. "\n" .. markup.util.indent(content, lastIndent - baseIndent)
@@ -1174,7 +1153,7 @@ function listElements(items, options)
 		for _ = math.max(items[i].level, baseIndent), lastIndent - 1 do
 			lastIndent = lastIndent - 1; line("</ul>"); end
 
-		line(listItemToHTML(items[i]))
+		line(list_item_to_html(items[i]))
 	end
 
 	for i = baseIndent, lastIndent - 1 do
@@ -1183,32 +1162,32 @@ function listElements(items, options)
 	return s
 end
 
-function listItemToHTML(li, options)
+function list_item_to_html(li, options)
 	return "<li class=\"" .. markup.html.class(HTML_LIST_ITEM) .. "\">\n"
-	.. markup.util.indent(inlinesToHTML(li.content, options))
+	.. markup.util.indent(inlines_to_html(li.content, options))
 	.. "\n</li>"
 end
 
-function formatError(err)
-	return "<span class=\"" .. markup.html.class(HTML_FORMAT_ERROR) .. "\">&lt; " .. markup.util.htmlEscape(err) .. " &gt;</span>"
+function format_error(err)
+	return "<span class=\"" .. markup.html.class(HTML_FORMAT_ERROR) .. "\">&lt; " .. markup.util.html_escape(err) .. " &gt;</span>"
 end
 
-function blockFormatError(err)
-	return "<p class=\"" .. markup.html.class(HTML_FORMAT_ERROR, HTML_BLOCK) .. "\">&lt; " .. markup.util.htmlEscape(err) .. " &gt;</p>"
+function block_format_error(err)
+	return "<p class=\"" .. markup.html.class(HTML_FORMAT_ERROR, HTML_BLOCK) .. "\">&lt; " .. markup.util.html_escape(err) .. " &gt;</p>"
 end
 
 markup.util.map = map
 markup.util.get = get
-markup.util.flatMap = flatMap
-markup.util.indexOf = indexOf
-markup.util.patternEscape = patternEscape
+markup.util.flat_map = flat_map
+markup.util.index_of = index_of
+markup.util.pattern_escape = pattern_escape
 markup.util.last = last
 markup.util.indent = indent
 
-urlEscapeTable = {}
+url_escape_table = {}
 
 for i = 0, 255 do
-	urlEscapeTable[string.char(i)] = "%" .. ("%02X"):format(i)
+	url_escape_table[string.char(i)] = "%" .. ("%02X"):format(i)
 end
 
 return markup

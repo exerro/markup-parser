@@ -2,7 +2,7 @@
 local markup = require "src.markup"
 local scan = require "src.scan"
 
-local h = io.open("docs/README.md", "r")
+local h = io.open("docs/util.md", "r")
 local content = h:read("*a")
 local parsed, topics
 h:close()
