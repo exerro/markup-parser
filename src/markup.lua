@@ -632,7 +632,7 @@ function markup.update.remove_after(f, document, filter, deep_update)
 	end
 
 	return f(document, function(node)
-		include = not filter(node)
+		include = include and not filter(node)
 		return nil
 	end, {
 		filter = function(...)
@@ -655,7 +655,7 @@ function markup.update.remove_before(f, document, filter, deep_update)
 		return nil
 	end, {
 		filter = function(...)
-			include = filter(...)
+			include = include or filter(...)
 			return include
 		end,
 		include_unfiltered = false,
@@ -970,8 +970,9 @@ function generic_update(f, options, children, children_of, set_children)
 
 	for i = 1, #children do
 		local elem = children[i]
+		local filtered = not options.filter or options.filter(elem)
 
-		if not options.filter or options.filter(elem) then
+		if filtered then
 			local upd = f(elem)
 
 			if upd and (#upd ~= 1 or upd[1] ~= elem) then
@@ -988,7 +989,7 @@ function generic_update(f, options, children, children_of, set_children)
 			changed = true
 		end
 
-		if options.no_filter_stop then
+		if not filtered and options.no_filter_stop then
 			return result, changed or i ~= #children
 		end
 	end
