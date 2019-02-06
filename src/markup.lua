@@ -700,7 +700,8 @@ function markup.html.render(document, options)
 end
 
 function markup.html.headerID(headerNode)
-	return table.concat(map(get("content"), markup.scan.find_all_text(
+	return table.concat(map(get("content"), markup.scan.find_all(
+		markup.scan.text,
 		headerNode.content,
 		markup.filter.has_text
 	))):gsub("<.->", "")
