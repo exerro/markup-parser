@@ -377,13 +377,13 @@ function markup.tostring(item)
 	return table.concat(ss, markup.is_block(item[1]) and "\n\n" or "")
 end
 
-function markup.scan:document(f, options)
+function markup.scan.document(document, f, options)
 	options = options or {}
 	options.deep_scan = options.deep_scan == nil or options.deep_scan
 
 	generic_scan(f, options, function(t)
-		for i = 1, #self do
-			t[i] = self[i]
+		for i = 1, #document do
+			t[i] = document[i]
 		end
 	end, function(block)
 		if block.type == markup.BLOCK_QUOTE then
@@ -394,15 +394,15 @@ function markup.scan:document(f, options)
 	end)
 end
 
-function markup.scan:text(f, options)
+function markup.scan.text(document, f, options)
 	options = options or {}
 	options.deep_scan = options.deep_scan == nil or options.deep_scan
 
-	if self[1] and markup.is_inline(self[1]) then
-		self = {{ type = markup.PARAGRAPH, content = self }}
+	if document[1] and markup.is_inline(document[1]) then
+		document = {{ type = markup.PARAGRAPH, content = document }}
 	end
 
-	return markup.scan.document(self, function(block)
+	return markup.scan.document(document, function(block)
 		local populate = function(t) end
 
 		if block.type == markup.PARAGRAPH or block.type == markup.HEADER then
@@ -440,11 +440,14 @@ function markup.scan:text(f, options)
 	})
 end
 
-function markup.scan:find_first(matching, deep_scan)
+function markup.scan.find_first(f, document, matching, deep_scan)
 	local result
 
-	options = options or {}
-	markup.scan.document(self, function(item)
+	if f ~= markup.scan.document and f ~= markup.scan.text then
+		return error("invalid first parameter: must be either markup.scan.document or markup.scan.text")
+	end
+
+	f(document, function(item)
 		result = item
 		return true
 	end, {
@@ -456,11 +459,14 @@ function markup.scan:find_first(matching, deep_scan)
 	return result
 end
 
-function markup.scan:find_all(matching, deep_scan)
+function markup.scan.find_all(f, document, matching, deep_scan)
 	local results = {}
 
-	options = options or {}
-	markup.scan.document(self, function(item)
+	if f ~= markup.scan.document and f ~= markup.scan.text then
+		return error("invalid first parameter: must be either markup.scan.document or markup.scan.text")
+	end
+
+	f(document, function(item)
 		results[#results + 1] = item
 	end, {
 		filter = matching,
@@ -471,35 +477,208 @@ function markup.scan:find_all(matching, deep_scan)
 	return results
 end
 
-function markup.scan:find_first_text(matching, deep_scan)
-	local result
-
+-- filter
+-- deep_update
+-- no_filter_stop
+-- include_unfiltered
+function markup.update.document(document, f, options)
 	options = options or {}
-	markup.scan.text(self, function(item)
-		result = item
-		return true
-	end, {
-		filter = matching,
-		no_filter_stop = false,
-		deep_scan = deep_scan
-	})
+	options.deep_update = options.deep_update == nil or options.deep_update
 
-	return result
+	return generic_update(f, options, document, function(node)
+		return node.type == markup.BLOCK_QUOTE and node.content or {}
+	end, function(node, children)
+		-- this must be a block quote
+		return {
+			type = node.type,
+			content = children
+		}
+	end)
 end
 
-function markup.scan:find_all_text(matching, deep_scan)
-	local results = {}
-
+function markup.update.text(document, f, options)
 	options = options or {}
-	markup.scan.text(self, function(item)
-		results[#results + 1] = item
-	end, {
-		filter = matching,
-		no_filter_stop = false,
-		deep_scan = deep_scan
-	})
+	options.deep_scan = options.deep_scan == nil or options.deep_scan
 
-	return results
+	local changed = false
+
+	if document[1] and markup.is_inline(document[1]) then
+		local res, changed = markup.update.text(document, {markup.paragraph(document)}, options)
+		return res[1].content, changed
+	end
+
+	local function children_of(inline)
+		if inline.type == markup.UNDERLINE
+		or inline.type == markup.BOLD
+		or inline.type == markup.ITALIC
+		or inline.type == markup.STRIKETHROUGH
+		or inline.type == markup.LINK
+		or inline.type == markup.REFERENCE
+		then
+			return inline.content
+		else
+			return {}
+		end
+	end
+
+	local function set_children(inline, children)
+		local new = {}
+
+		for k, v in pairs(inline) do
+			new[k] = v
+		end
+
+		new.content = children
+
+		return new
+	end
+
+	return markup.update.document(document, function(block)
+		if block.type == markup.PARAGRAPH or block.type == markup.HEADER then
+			local new_children, changed = generic_update(f, options, block.content, children_of, set_children)
+
+			return {changed and {
+				type = block.type,
+				content = new_children,
+				size = block.size -- for headers
+			} or block}
+
+		elseif block.type == markup.LIST then
+			local new_items = {}
+			local sub_changed = true
+
+			for i = 1, #block.items do
+				new_items[#new_items + 1], sub_changed = generic_update(f, options, block.items[i].content, children_of, set_children)
+				changed = changed or sub_changed
+			end
+
+			return {changed and {
+				type = markup.LIST,
+				items = new_items
+			} or block}
+		end
+	end, {
+		filter = options.block_filter,
+		deep_update = true
+	})
+end
+
+function markup.update.insert_after(f, document, filter, insertion, many, deep_update)
+	local changed = false
+
+	if f ~= markup.update.document and f ~= markup.update.text then
+		return error("invalid first parameter: must be either markup.update.document or markup.update.text")
+	end
+
+	return markup.update.document(document, function(node)
+		changed = not many
+		return {node, insertion}
+	end, {
+		filter = function(...)
+			return not changed and filter(...)
+		end,
+		include_unfiltered = true,
+		deep_update = deep_update
+	})
+end
+
+function markup.update.insert_before(f, document, filter, insertion, many, deep_update)
+	local changed = false
+
+	if f ~= markup.update.document and f ~= markup.update.text then
+		return error("invalid first parameter: must be either markup.update.document or markup.update.text")
+	end
+
+	return markup.update.document(document, function(node)
+		changed = not many
+		return {insertion, node}
+	end, {
+		filter = function(...)
+			return not changed and filter(...)
+		end,
+		include_unfiltered = true,
+		deep_update = deep_update
+	})
+end
+
+-- this works, seriously, it doesn't look like it should but it does and I love it
+-- filtering the nodes to _remove_, you say? yep, note `include_unfiltered` and the `{}` return value
+-- am I mad? maybe. do I write cool code? fuck yeah
+function markup.update.remove(f, document, filter, many, deep_update)
+	local changed = false
+
+	if f ~= markup.update.document and f ~= markup.update.text then
+		return error("invalid first parameter: must be either markup.update.document or markup.update.text")
+	end
+
+	return f(document, function(node)
+		changed = not many
+		return {}
+	end, {
+		filter = function(...)
+			return not changed and filter(...)
+		end,
+		include_unfiltered = true,
+		deep_update = deep_update
+	})
+end
+
+function markup.update.remove_after(f, document, filter, many, deep_update)
+	local include = true
+
+	if f ~= markup.update.document and f ~= markup.update.text then
+		return error("invalid first parameter: must be either markup.update.document or markup.update.text")
+	end
+
+	return f(document, function(node)
+		include = not filter(node)
+		return nil
+	end, {
+		filter = function(...)
+			return include
+		end,
+		no_filter_stop = true,
+		include_unfiltered = false,
+		deep_update = deep_update
+	})
+end
+
+function markup.update.remove_before(f, document, filter, many, deep_update)
+	local include = false
+
+	if f ~= markup.update.document and f ~= markup.update.text then
+		return error("invalid first parameter: must be either markup.update.document or markup.update.text")
+	end
+
+	return f(document, function(node)
+		return nil
+	end, {
+		filter = function(...)
+			include = filter(...)
+			return include
+		end,
+		include_unfiltered = false,
+		deep_update = deep_update
+	})
+end
+
+function markup.update.replace(f, document, filter, map, many, deep_update)
+	local changed = false
+
+	if f ~= markup.update.document and f ~= markup.update.text then
+		return error("invalid first parameter: must be either markup.update.document or markup.update.text")
+	end
+
+	return f(document, function(node)
+		changed = not many
+		return type(map) == "table" and map or map(node)
+	end, {
+		filter = function(...)
+			return not many and filter(...)
+		end,
+		include_unfiltered = true,
+		deep_update = deep_update
+	})
 end
 
 function markup.html.render(document, options)
@@ -579,6 +758,12 @@ end
 function markup.filter.property_equals(property, value)
 	return markup.filter.new(function(item)
 		return item[property] == value
+	end)
+end
+
+function markup.filter.property_contains(property, value)
+	return markup.filter.new(function(item)
+		return tostring(item[property]):find(value)
 	end)
 end
 
@@ -770,6 +955,60 @@ function generic_scan(f, options, populate, children_of)
 
 		i = i + 1
 	end
+end
+
+-- filter
+-- deep_update
+-- no_filter_stop
+-- include_unfiltered
+function generic_update(f, options, children, children_of, set_children)
+	local result = {}
+	local changed = false
+	local children_changed = false
+
+	for i = 1, #children do
+		local elem = children[i]
+
+		if not options.filter or options.filter(elem) then
+			local upd = f(elem)
+
+			if upd and (#upd ~= 1 or upd[1] ~= elem) then
+				for j = 1, #upd do
+					result[#result + 1] = upd[j]
+				end
+				changed = true
+			else
+				result[#result + 1] = elem
+			end
+		elseif options.include_unfiltered then
+			result[#result + 1] = elem
+		else
+			changed = true
+		end
+
+		if options.no_filter_stop then
+			return result, changed or i ~= #children
+		end
+	end
+
+	if options.deep_update then
+		for i = 1, #result do
+			local elem = result[i]
+			local sub_children = children_of(elem)
+			local upd_sub_children, sub_changed = generic_update(f, options, sub_children, children_of, set_children)
+
+			if sub_changed then
+				result[i] = set_children(elem, sub_children)
+				children_changed = true
+			end
+		end
+
+		if children_changed then
+			return generic_update(f, options, result, children_of, set_children)
+		end
+	end
+
+	return result, changed
 end
 
 -- splits a string into a list of its lines

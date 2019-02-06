@@ -58,6 +58,14 @@ filter markup.filter.property_equals(string property, any value)
 
 Returns a filter matching only nodes where `node[property] == value`
 
+### markup.filter.property_contains
+
+```
+filter markup.filter.property_contains(string property, string value)
+```
+
+Returns a filter matching only nodes where `node[property]:find(value)`
+
 ### markup.filter.property_matches
 
 ```
