@@ -675,7 +675,7 @@ function markup.update.replace(f, document, filter, map, many, deep_update)
 		return type(map) == "table" and map or map(node)
 	end, {
 		filter = function(...)
-			return not many and filter(...)
+			return not changed and filter(...)
 		end,
 		include_unfiltered = true,
 		deep_update = deep_update
