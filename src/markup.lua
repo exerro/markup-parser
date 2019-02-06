@@ -559,6 +559,7 @@ function markup.update.text(document, f, options)
 		end
 	end, {
 		filter = options.block_filter,
+		include_unfiltered = options.block_include_unfiltered,
 		deep_update = true
 	})
 end
@@ -623,7 +624,7 @@ function markup.update.remove(f, document, filter, many, deep_update)
 	})
 end
 
-function markup.update.remove_after(f, document, filter, many, deep_update)
+function markup.update.remove_after(f, document, filter, deep_update)
 	local include = true
 
 	if f ~= markup.update.document and f ~= markup.update.text then
@@ -643,7 +644,7 @@ function markup.update.remove_after(f, document, filter, many, deep_update)
 	})
 end
 
-function markup.update.remove_before(f, document, filter, many, deep_update)
+function markup.update.remove_before(f, document, filter, deep_update)
 	local include = false
 
 	if f ~= markup.update.document and f ~= markup.update.text then

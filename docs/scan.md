@@ -2,11 +2,11 @@
 # Scan submodule
 
 The `scan` submodule provides functions for scanning through documents and finding particular nodes. It relies heavily on the [filter](docs/filter.md) submodule.
-All parameters or fields named `filter` have type `filter`, from the `filter` submodule.
+All parameters or fields named `filter` have type `filter`, from the `filter` submodule. In addition, all parameters named `scan_type` must equal either `markup.scan.document` or `markup.scan.text`.
 
 ## Library
 
-Note that for all functions below, `document` has type `block_node[]` (i.e. the result of `markup.parse()`, or for `_text` variants, also accepts `inline_node[]`.
+> Note that for all functions below, `document` has type `block_node[]` (i.e. the result of `markup.parse()`), but for text variants, this parameter also accepts `inline_node[]` (i.e. the result of `markup.parse_text()`).
 
 ### markup.scan.document
 
@@ -46,31 +46,15 @@ Works similarly to [`markup.scan.document`](#markup-scan-document), but for inli
 ### markup.scan.find\_first
 
 ```
-block_node? markup.scan.find_first(document, filter, boolean deep_scan)
+block_node? markup.scan.find_first(scan_type, document, filter, boolean deep_scan)
 ```
 
-Returns the first block node matching the filter.
-
-### markup.scan.find\_first\_text
-
-```
-inline_node? markup.scan.find_first_text(document, filter, boolean deep_scan)
-```
-
-Returns the first inline node matching the filter.
+Returns the first node matching the filter.
 
 ### markup.scan.find\_all
 
 ```
-block_node[] markup.scan.find_all(document, filter, boolean deep_scan)
+block_node[] markup.scan.find_all(scan_type, document, filter, boolean deep_scan)
 ```
 
-Returns all block nodes matching the filter.
-
-### markup.scan.find\_all\_text
-
-```
-inline_node[] markup.scan.find_all_text(document, filter, boolean deep_scan)
-```
-
-Returns all inline nodes matching the filter.
+Returns all nodes matching the filter.
