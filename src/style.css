@@ -143,9 +143,12 @@
 .mu-math {
 	font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
 	font-style: italic;
-	margin: 0;
-	display: inline-block;
+}
+
+.mu-block .mu-math {
 	vertical-align: middle;
+	display: inline-block;
+	margin: 0;
 }
 
 .mu-math .mu-block {

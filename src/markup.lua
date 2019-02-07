@@ -205,7 +205,7 @@ function markup.reference(text, reference)
 	end
 
 	if not reference then
-		reference = table.concat(map(get("content"), markup.scan.find_all_text(text, markup.filter.has_text)))
+		reference = table.concat(map(get("content"), markup.scan.find_all(markup.scan.text, text, markup.filter.has_text)))
 	end
 	
 	return {
@@ -820,7 +820,11 @@ function markup.parse_text(text)
 	local i = 1
 
 	local function push(value)
-		insert(last(value_stack), value)
+		if value.type == markup.TEXT and last(last(value_stack)) and last(last(value_stack)).type == markup.TEXT then
+			last(last(value_stack)).content = last(last(value_stack)).content .. value.content
+		else
+			insert(last(value_stack), value)
+		end
 	end
 
 	local function pop()
@@ -847,8 +851,8 @@ function markup.parse_text(text)
 			"%[[^%[%]]+%]%([^%(%)]+%)", -- link
 			"!%[[^%[%]]*%]%([^%(%)]+%)", -- image
 			"%[%[[^%[%]]+%]%]", -- relative link
-			pattern_escape(REFERENCE_SYM) .. "{[^{}]+}", -- reference 1
-			pattern_escape(REFERENCE_SYM) .. "%S+", -- reference 2
+			"%s" .. pattern_escape(REFERENCE_SYM) .. "{[^{}]+}", -- reference 1
+			"%s" .. pattern_escape(REFERENCE_SYM) .. "%S+", -- reference 2
 			pattern_escape(MATH_SYM) .. "[^" .. pattern_escape(MATH_SYM) .. "]+" .. pattern_escape(MATH_SYM), -- math
 			pattern_escape(VARIABLE_SYM) .. "`[^`]+`", -- variable
 			{pattern_escape(CODE_SYM) .. "+"}, -- code
@@ -902,7 +906,7 @@ function markup.parse_text(text)
 			i = f + 1
 		else
 			local segment = text:match("^[^"
-			.. "%[%]{}%(%)!`\\"
+			.. "%[%]{}%(%)!`\\%s"
 			.. pattern_escape(REFERENCE_SYM)
 			.. pattern_escape(REFERENCE_SYM)
 			.. pattern_escape(MATH_SYM)
